@@ -9,7 +9,6 @@ export async function GET(
     const { symbol } = await params;
     const upper = symbol.toUpperCase();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const summary: any = await yahooFinance.quoteSummary(upper, {
       modules: [
         "financialData",
@@ -24,7 +23,6 @@ export async function GET(
     const ks = summary.defaultKeyStatistics ?? {};
 
     // Helper to safely extract a numeric raw value from Yahoo's typed objects
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const num = (v: any): number | undefined => {
       if (v === null || v === undefined) return undefined;
       if (typeof v === "number") return v;
@@ -41,7 +39,6 @@ export async function GET(
     // Income statements (annual, most recent first)
     const incomeStatements = (
       summary.incomeStatementHistory?.incomeStatementHistory ?? []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ).map((s: any) => ({
       date: fmtDate(s.endDate),
       totalRevenue: num(s.totalRevenue),
@@ -53,7 +50,6 @@ export async function GET(
     // Balance sheets (annual, most recent first)
     const balanceSheets = (
       summary.balanceSheetHistory?.balanceSheetStatements ?? []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ).map((s: any) => ({
       date: fmtDate(s.endDate),
       totalAssets: num(s.totalAssets),
@@ -66,7 +62,6 @@ export async function GET(
     // Cash flow statements (annual, most recent first)
     const cashFlows = (
       summary.cashflowStatementHistory?.cashflowStatements ?? []
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ).map((s: any) => {
       const opCF = num(s.totalCashFromOperatingActivities);
       const capex = num(s.capitalExpenditures);

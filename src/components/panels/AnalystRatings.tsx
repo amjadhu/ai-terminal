@@ -3,6 +3,7 @@
 import { Panel } from "@/components/ui/panel";
 import { useAnalysts } from "@/hooks/useMarketData";
 import { useSettingsStore } from "@/stores/settings";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 import type { AnalystData } from "@/types";
 
 // Maps Yahoo's recommendationKey to a display label and color
@@ -19,7 +20,7 @@ const RATING_CONFIG: Record<
 
 export function AnalystRatings() {
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
-  const { data, isLoading, error, refetch } = useAnalysts(selectedTicker);
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useAnalysts(selectedTicker);
 
   return (
     <Panel
@@ -27,6 +28,8 @@ export function AnalystRatings() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.analysts}
     >
       {data && <RatingsContent data={data} />}
     </Panel>

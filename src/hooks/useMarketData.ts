@@ -10,6 +10,7 @@ import type {
   EarningsItem,
   AnalystData,
   SectorData,
+  ScreenerRow,
 } from "@/types";
 
 export function useMarketOverview() {
@@ -186,5 +187,31 @@ export function useSectors() {
       return json.data;
     },
     refetchInterval: REFETCH_INTERVALS.sectors,
+  });
+}
+
+export function useScreener(params: {
+  minMarketCap?: number;
+  maxPE?: number;
+  minRevenueGrowth?: number;
+  minVolume?: number;
+  limit?: number;
+}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== 0) {
+      search.set(key, String(value));
+    }
+  });
+
+  return useQuery<ScreenerRow[]>({
+    queryKey: ["screener", search.toString()],
+    queryFn: async () => {
+      const res = await fetch(`/api/screener?${search.toString()}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      return json.data;
+    },
+    refetchInterval: REFETCH_INTERVALS.screener,
   });
 }

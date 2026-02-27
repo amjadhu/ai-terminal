@@ -8,9 +8,7 @@ export async function GET(request: Request) {
     if (!query) {
       return NextResponse.json({ results: [] });
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const results: any = await yahooFinance.search(query, { newsCount: 0 });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quotes = (results.quotes ?? []).slice(0, 8).map((q: any) => ({
       symbol: q.symbol,
       shortname: q.shortname ?? q.symbol,

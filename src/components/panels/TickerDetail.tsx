@@ -10,10 +10,11 @@ import {
   formatNumber,
   getChangeColor,
 } from "@/lib/utils";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 
 export function TickerDetail() {
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
-  const { data, isLoading, error, refetch } = useStockQuote(selectedTicker);
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useStockQuote(selectedTicker);
 
   return (
     <Panel
@@ -21,6 +22,8 @@ export function TickerDetail() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.quote}
     >
       {data && (
         <div className="p-3 space-y-3">

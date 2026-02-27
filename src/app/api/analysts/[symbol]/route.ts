@@ -9,7 +9,6 @@ export async function GET(
     const { symbol } = await params;
     const upper = symbol.toUpperCase();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const summary: any = await yahooFinance.quoteSummary(upper, {
       modules: ["financialData", "recommendationTrend"],
     });
@@ -17,7 +16,6 @@ export async function GET(
     const fd = summary.financialData ?? {};
     const rt = summary.recommendationTrend ?? {};
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const num = (v: any): number | undefined => {
       if (v === null || v === undefined) return undefined;
       if (typeof v === "number") return v;
@@ -26,7 +24,6 @@ export async function GET(
     };
 
     const trend = (rt.trend ?? []).map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (t: any) => ({
         period: t.period ?? "",
         strongBuy: t.strongBuy ?? 0,

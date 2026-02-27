@@ -9,7 +9,6 @@ export async function GET() {
 
     const results = await Promise.allSettled(
       allSymbols.map(async (item) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const q: any = await yahooFinance.quote(item.symbol);
         return {
           symbol: item.symbol,

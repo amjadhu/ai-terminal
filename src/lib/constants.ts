@@ -135,7 +135,15 @@ export const REFETCH_INTERVALS = {
   earnings: 300_000,
   analysts: 300_000,
   sectors: 60_000,
+  screener: 180_000,
 } as const;
+
+export const SCREENER_DEFAULTS = {
+  minMarketCap: 10_000_000_000,
+  maxPE: 60,
+  minRevenueGrowth: 0,
+  minVolume: 500_000,
+};
 
 export const TIME_RANGE_CONFIG: Record<
   string,

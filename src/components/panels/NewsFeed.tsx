@@ -5,6 +5,7 @@ import { Panel } from "@/components/ui/panel";
 import { useNews } from "@/hooks/useMarketData";
 import { useSettingsStore } from "@/stores/settings";
 import { ExternalLink } from "lucide-react";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 
 type NewsTab = "market" | "ticker";
 
@@ -13,7 +14,7 @@ export function NewsFeed() {
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
 
   const isTickerTab = tab === "ticker";
-  const { data, isLoading, error, refetch } = useNews(
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useNews(
     isTickerTab ? selectedTicker : undefined
   );
 
@@ -23,6 +24,8 @@ export function NewsFeed() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.news}
     >
       <div className="flex flex-col h-full">
         {/* Tab bar */}
@@ -67,6 +70,17 @@ export function NewsFeed() {
                   <div className="flex items-center gap-2 mt-1 text-[10px] text-terminal-muted">
                     <span>{item.publisher}</span>
                     <span>{formatTimeAgo(item.providerPublishTime)}</span>
+                    <span className="text-terminal-accent">impact {item.impactScore}</span>
+                  </div>
+                  <div className="flex gap-1 mt-1">
+                    {(item.catalystTags ?? []).slice(0, 3).map((tag) => (
+                      <span
+                        key={`${item.link}-${tag}`}
+                        className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-terminal-border rounded text-terminal-muted"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
                 <ExternalLink className="w-3 h-3 text-terminal-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5" />

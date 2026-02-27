@@ -7,7 +7,6 @@ export async function GET(
 ) {
   try {
     const { symbol } = await params;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quote: any = await yahooFinance.quote(symbol.toUpperCase());
     return NextResponse.json({
       symbol: quote.symbol,

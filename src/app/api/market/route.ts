@@ -6,7 +6,6 @@ export async function GET() {
   try {
     const results = await Promise.all(
       MARKET_INDICES.map(async (idx) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const q: any = await yahooFinance.quote(idx.symbol);
         return {
           symbol: q.symbol,

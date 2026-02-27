@@ -5,6 +5,7 @@ import { Panel } from "@/components/ui/panel";
 import { useFundamentals } from "@/hooks/useMarketData";
 import { useSettingsStore } from "@/stores/settings";
 import { formatNumber, formatPercent } from "@/lib/utils";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 import type { FundamentalsData, IncomeStatement, BalanceSheet, CashFlowStatement } from "@/types";
 
 type Tab = "overview" | "income" | "balance" | "cashflow";
@@ -19,7 +20,7 @@ const TABS: { id: Tab; label: string }[] = [
 export function Fundamentals() {
   const [tab, setTab] = useState<Tab>("overview");
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
-  const { data, isLoading, error, refetch } = useFundamentals(selectedTicker);
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useFundamentals(selectedTicker);
 
   return (
     <Panel
@@ -27,6 +28,8 @@ export function Fundamentals() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.fundamentals}
     >
       {data && (
         <div className="flex flex-col h-full">

@@ -10,6 +10,8 @@ interface PanelProps {
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
+  lastUpdatedAt?: number;
+  staleAfterMs?: number;
 }
 
 export function Panel({
@@ -19,7 +21,11 @@ export function Panel({
   isLoading,
   error,
   onRetry,
+  lastUpdatedAt,
+  staleAfterMs = 60_000,
 }: PanelProps) {
+  const freshness = getFreshness(lastUpdatedAt, staleAfterMs);
+
   return (
     <div
       className={cn(
@@ -31,14 +37,30 @@ export function Panel({
         <h2 className="text-xs font-semibold uppercase tracking-wider text-terminal-muted">
           {title}
         </h2>
-        {onRetry && (
-          <button
-            onClick={onRetry}
-            className="text-terminal-muted hover:text-terminal-text transition-colors"
-          >
-            <RefreshCw className="w-3 h-3" />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {freshness && (
+            <div className="flex items-center gap-1 text-[10px] text-terminal-muted">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  freshness.level === "fresh"
+                    ? "bg-terminal-up"
+                    : freshness.level === "aging"
+                    ? "bg-yellow-400"
+                    : "bg-terminal-down"
+                }`}
+              />
+              <span>{freshness.label}</span>
+            </div>
+          )}
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="text-terminal-muted hover:text-terminal-text transition-colors"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex-1 overflow-auto min-h-0">
         {isLoading ? (
@@ -51,6 +73,14 @@ export function Panel({
       </div>
     </div>
   );
+}
+
+function getFreshness(lastUpdatedAt?: number, staleAfterMs = 60_000) {
+  if (!lastUpdatedAt) return null;
+  const age = Date.now() - lastUpdatedAt;
+  if (age < staleAfterMs) return { level: "fresh", label: "LIVE" } as const;
+  if (age < staleAfterMs * 2) return { level: "aging", label: "AGING" } as const;
+  return { level: "stale", label: "STALE" } as const;
 }
 
 function PanelSkeleton() {

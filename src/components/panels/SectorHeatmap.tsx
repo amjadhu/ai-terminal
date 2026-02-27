@@ -3,10 +3,11 @@
 import { Panel } from "@/components/ui/panel";
 import { useSectors } from "@/hooks/useMarketData";
 import { useSettingsStore } from "@/stores/settings";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 import type { SectorData } from "@/types";
 
 export function SectorHeatmap() {
-  const { data, isLoading, error, refetch } = useSectors();
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useSectors();
   const setSelectedTicker = useSettingsStore((s) => s.setSelectedTicker);
 
   return (
@@ -15,6 +16,8 @@ export function SectorHeatmap() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.sectors}
     >
       <div className="p-2 grid grid-cols-3 gap-1.5 h-full content-start">
         {data?.map((sector) => (

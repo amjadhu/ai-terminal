@@ -45,7 +45,18 @@ export interface NewsItem {
   publisher: string;
   providerPublishTime: number;
   thumbnail?: string;
+  catalystTags: CatalystTag[];
+  impactScore: number;
 }
+
+export type CatalystTag =
+  | "earnings"
+  | "m&a"
+  | "analyst"
+  | "macro"
+  | "product"
+  | "regulatory"
+  | "other";
 
 export interface SearchResult {
   symbol: string;
@@ -169,4 +180,58 @@ export interface SectorData {
   price: number;
   change: number;
   changePercent: number;
+}
+
+// ─── Portfolio ───────────────────────────────────────────────────────────────
+
+export interface PortfolioPosition {
+  symbol: string;
+  shares: number;
+  avgCost: number;
+}
+
+export interface PortfolioSnapshot {
+  marketValue: number;
+  costBasis: number;
+  unrealizedPnL: number;
+  unrealizedPnLPercent: number;
+  dayPnL: number;
+  dayPnLPercent: number;
+}
+
+// ─── Alerts ──────────────────────────────────────────────────────────────────
+
+export type AlertMetric = "price" | "changePercent" | "volume";
+export type AlertOperator = "gte" | "lte";
+
+export interface AlertRule {
+  id: string;
+  symbol: string;
+  metric: AlertMetric;
+  operator: AlertOperator;
+  threshold: number;
+  enabled: boolean;
+  lastTriggeredAt?: number;
+}
+
+export interface AlertEvent {
+  id: string;
+  ruleId: string;
+  symbol: string;
+  message: string;
+  triggeredAt: number;
+}
+
+// ─── Screener ────────────────────────────────────────────────────────────────
+
+export interface ScreenerRow {
+  symbol: string;
+  shortName: string;
+  regularMarketPrice: number;
+  regularMarketChangePercent: number;
+  regularMarketVolume: number;
+  marketCap?: number;
+  trailingPE?: number;
+  revenueGrowth?: number;
+  grossMargins?: number;
 }

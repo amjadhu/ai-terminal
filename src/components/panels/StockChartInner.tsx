@@ -7,18 +7,30 @@ import {
   type ISeriesApi,
   CandlestickSeries,
   HistogramSeries,
+  LineSeries,
 } from "lightweight-charts";
 import type { ChartDataPoint } from "@/types";
 
 interface Props {
   data: ChartDataPoint[];
+  compareData: ChartDataPoint[];
+  showSma20: boolean;
+  showSma50: boolean;
 }
 
-export default function StockChartInner({ data }: Props) {
+export default function StockChartInner({
+  data,
+  compareData,
+  showSma20,
+  showSma50,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
   const volumeRef = useRef<ISeriesApi<"Histogram"> | null>(null);
+  const sma20Ref = useRef<ISeriesApi<"Line"> | null>(null);
+  const sma50Ref = useRef<ISeriesApi<"Line"> | null>(null);
+  const compareRef = useRef<ISeriesApi<"Line"> | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -68,6 +80,27 @@ export default function StockChartInner({ data }: Props) {
     candleRef.current = candle;
     volumeRef.current = volume;
 
+    sma20Ref.current = chart.addSeries(LineSeries, {
+      color: "#facc15",
+      lineWidth: 2,
+      priceLineVisible: false,
+    });
+    sma50Ref.current = chart.addSeries(LineSeries, {
+      color: "#60a5fa",
+      lineWidth: 2,
+      priceLineVisible: false,
+    });
+    compareRef.current = chart.addSeries(LineSeries, {
+      color: "#a78bfa",
+      lineWidth: 2,
+      lineStyle: 2,
+      priceLineVisible: false,
+      priceScaleId: "compare",
+    });
+    compareRef.current.priceScale().applyOptions({
+      scaleMargins: { top: 0.15, bottom: 0.25 },
+    });
+
     const ro = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
       if (width > 0 && height > 0) {
@@ -82,6 +115,9 @@ export default function StockChartInner({ data }: Props) {
       chartRef.current = null;
       candleRef.current = null;
       volumeRef.current = null;
+      sma20Ref.current = null;
+      sma50Ref.current = null;
+      compareRef.current = null;
     };
   }, []);
 
@@ -119,8 +155,40 @@ export default function StockChartInner({ data }: Props) {
       }))
     );
 
+    if (sma20Ref.current) {
+      sma20Ref.current.applyOptions({ visible: showSma20 });
+      sma20Ref.current.setData(makeSMA(unique, 20));
+    }
+    if (sma50Ref.current) {
+      sma50Ref.current.applyOptions({ visible: showSma50 });
+      sma50Ref.current.setData(makeSMA(unique, 50));
+    }
+    if (compareRef.current) {
+      compareRef.current.setData(normalizeCompare(compareData));
+      compareRef.current.applyOptions({ visible: compareData.length > 0 });
+    }
+
     chartRef.current?.timeScale().fitContent();
-  }, [data]);
+  }, [data, compareData, showSma20, showSma50]);
 
   return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />;
+}
+
+function makeSMA(data: ChartDataPoint[], period: number) {
+  let rollingSum = 0;
+  return data.map((d, i) => {
+    rollingSum += d.close;
+    if (i >= period) rollingSum -= data[i - period].close;
+    const value = i >= period - 1 ? rollingSum / period : d.close;
+    return { time: d.time, value };
+  });
+}
+
+function normalizeCompare(data: ChartDataPoint[]) {
+  if (!data.length) return [];
+  const base = data[0].close || 1;
+  return data.map((d) => ({
+    time: d.time,
+    value: (d.close / base) * 100,
+  }));
 }

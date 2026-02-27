@@ -3,10 +3,11 @@
 import { Panel } from "@/components/ui/panel";
 import { useMacroData } from "@/hooks/useMarketData";
 import { formatPrice, formatChange, formatPercent, getChangeColor } from "@/lib/utils";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 import type { MarketIndex } from "@/types";
 
 export function MarketOverview() {
-  const { data, isLoading, error, refetch } = useMacroData();
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useMacroData();
 
   return (
     <Panel
@@ -14,6 +15,8 @@ export function MarketOverview() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.market}
     >
       <div className="flex items-stretch h-full overflow-x-auto px-2 py-1 gap-0">
         {data?.map((group, gi) => (

@@ -18,6 +18,12 @@ const DEFAULT_LAYOUT: PanelLayout[] = [
   { i: "movers",       x: 8, y: 21, w: 4,  h: 8,  minW: 3, minH: 4 },
   // Row 5 — sector heatmap (full width)
   { i: "sector",       x: 0, y: 29, w: 12, h: 8,  minW: 6, minH: 5 },
+  // Row 6 — portfolio + compare
+  { i: "portfolio",    x: 0, y: 37, w: 6,  h: 9,  minW: 4, minH: 6 },
+  { i: "compare",      x: 6, y: 37, w: 6,  h: 9,  minW: 4, minH: 6 },
+  // Row 7 — alerts + screener
+  { i: "alerts",       x: 0, y: 46, w: 5,  h: 9,  minW: 4, minH: 6 },
+  { i: "screener",     x: 5, y: 46, w: 7,  h: 9,  minW: 5, minH: 6 },
 ];
 
 interface LayoutStore {
@@ -33,7 +39,7 @@ export const useLayoutStore = create<LayoutStore>()(
       setLayouts: (layouts) => set({ layouts }),
       resetLayouts: () => set({ layouts: DEFAULT_LAYOUT }),
     }),
-    // v2: bumped to ensure new panels appear for returning users
-    { name: "layout-storage-v2" }
+    // v3: includes research, portfolio, and alerts panels
+    { name: "layout-storage-v3" }
   )
 );

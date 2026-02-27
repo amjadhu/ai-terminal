@@ -6,7 +6,6 @@ export async function GET() {
   try {
     const results = await Promise.allSettled(
       SECTOR_ETFS.map(async (etf) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const q: any = await yahooFinance.quote(etf.symbol);
         return {
           symbol: etf.symbol,

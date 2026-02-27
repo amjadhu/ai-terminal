@@ -5,6 +5,7 @@ import { useWatchlistStore } from "@/stores/watchlist";
 import { useSettingsStore } from "@/stores/settings";
 import { useLayoutStore } from "@/stores/layout";
 import { DEFAULT_WATCHLIST } from "@/lib/constants";
+import { mergeWatchlists } from "@/lib/watchlist";
 
 export function useServerSync() {
   const skipMount = useRef(true);
@@ -23,16 +24,7 @@ export function useServerSync() {
       .then((server) => {
         console.log("[sync] server state:", server);
         if (server.tickers?.length) {
-          const ordered = [
-            ...server.tickers.map((t: string) => t.toUpperCase()),
-            ...DEFAULT_WATCHLIST,
-          ];
-          const seen = new Set<string>();
-          const mergedTickers = ordered.filter((t) => {
-            if (seen.has(t)) return false;
-            seen.add(t);
-            return true;
-          });
+          const mergedTickers = mergeWatchlists(server.tickers, DEFAULT_WATCHLIST);
           useWatchlistStore.setState({ tickers: mergedTickers });
         }
         if (server.selectedTicker)

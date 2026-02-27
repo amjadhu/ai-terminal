@@ -10,7 +10,6 @@ export async function GET() {
     const quotes = await Promise.all(
       symbols.map(async (symbol: string) => {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const q: any = await yahooFinance.quote(symbol);
           return {
             symbol: q.symbol,

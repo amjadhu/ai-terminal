@@ -12,7 +12,6 @@ export async function GET(
     const range = searchParams.get("range") ?? "1M";
     const config = TIME_RANGE_CONFIG[range] ?? TIME_RANGE_CONFIG["1M"];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result: any = await yahooFinance.chart(symbol.toUpperCase(), {
       period1: getStartDate(config.range),
       interval: config.interval as "1d" | "1wk" | "1mo" | "5m" | "15m",

@@ -3,11 +3,12 @@
 import { Panel } from "@/components/ui/panel";
 import { useEarnings } from "@/hooks/useMarketData";
 import { useWatchlistStore } from "@/stores/watchlist";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 import type { EarningsItem } from "@/types";
 
 export function EarningsCalendar() {
   const watchlist = useWatchlistStore((s) => s.tickers);
-  const { data, isLoading, error, refetch } = useEarnings(watchlist);
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useEarnings(watchlist);
 
   return (
     <Panel
@@ -15,6 +16,8 @@ export function EarningsCalendar() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.earnings}
     >
       {data && data.length === 0 ? (
         <div className="flex items-center justify-center h-24 text-xs text-terminal-muted">

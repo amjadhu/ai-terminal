@@ -16,12 +16,10 @@ export async function GET(request: Request) {
 
     const results = await Promise.allSettled(
       symbols.map(async (symbol) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const summary: any = await yahooFinance.quoteSummary(symbol, {
           modules: ["calendarEvents", "earningsTrend", "price"],
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const num = (v: any): number | undefined => {
           if (v === null || v === undefined) return undefined;
           if (typeof v === "number") return v;
@@ -43,7 +41,6 @@ export async function GET(request: Request) {
         const revenueEstimate = num(cal.earnings?.revenueAverage);
 
         // Most recent actual EPS from earningsTrend (0q = current quarter, +1q = next)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const trends: any[] = trend.trend ?? [];
         const currentQTrend = trends.find((t: any) => t.period === "0q");
         const epsActual = num(currentQTrend?.earningsEstimate?.avg);
@@ -59,7 +56,6 @@ export async function GET(request: Request) {
       })
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const all: any[] = results.map((r, i) =>
       r.status === "fulfilled"
         ? r.value

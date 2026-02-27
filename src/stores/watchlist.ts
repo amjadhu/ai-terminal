@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_WATCHLIST } from "@/lib/constants";
+import { mergeWatchlists } from "@/lib/watchlist";
 
 interface WatchlistStore {
   tickers: string[];
@@ -50,16 +51,7 @@ export const useWatchlistStore = create<WatchlistStore>()(
           ? (persistedState as Partial<WatchlistStore>).tickers ?? []
           : [];
 
-        const ordered = [
-          ...persistedTickers.map((t) => t.toUpperCase()),
-          ...DEFAULT_WATCHLIST,
-        ];
-        const seen = new Set<string>();
-        const mergedTickers = ordered.filter((t) => {
-          if (seen.has(t)) return false;
-          seen.add(t);
-          return true;
-        });
+        const mergedTickers = mergeWatchlists(persistedTickers, DEFAULT_WATCHLIST);
 
         return {
           ...currentState,

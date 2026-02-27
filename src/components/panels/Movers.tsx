@@ -4,10 +4,11 @@ import { Panel } from "@/components/ui/panel";
 import { useTrending } from "@/hooks/useMarketData";
 import { useSettingsStore } from "@/stores/settings";
 import { formatPrice, formatPercent, getChangeColor } from "@/lib/utils";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 export function Movers() {
-  const { data, isLoading, error, refetch } = useTrending();
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useTrending();
   const setSelectedTicker = useSettingsStore((s) => s.setSelectedTicker);
 
   return (
@@ -16,6 +17,8 @@ export function Movers() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.market}
     >
       <div className="p-2 space-y-3">
         <div>

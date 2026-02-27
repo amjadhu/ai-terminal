@@ -12,13 +12,14 @@ import {
   formatVolume,
   getChangeColor,
 } from "@/lib/utils";
+import { REFETCH_INTERVALS } from "@/lib/constants";
 import { GripVertical, Plus, X } from "lucide-react";
 
 export function Watchlist() {
   const { tickers, addTicker, removeTicker, moveTicker } = useWatchlistStore();
   const setSelectedTicker = useSettingsStore((s) => s.setSelectedTicker);
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
-  const { data, isLoading, error, refetch } = useMultiQuote(tickers);
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useMultiQuote(tickers);
   const [addInput, setAddInput] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [draggedSymbol, setDraggedSymbol] = useState<string | null>(null);
@@ -44,6 +45,8 @@ export function Watchlist() {
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
+      lastUpdatedAt={dataUpdatedAt}
+      staleAfterMs={REFETCH_INTERVALS.quote}
     >
       <div className="flex flex-col h-full">
         <table className="w-full text-xs">

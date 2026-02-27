@@ -13,6 +13,10 @@ import { Fundamentals } from "@/components/panels/Fundamentals";
 import { EarningsCalendar } from "@/components/panels/EarningsCalendar";
 import { SectorHeatmap } from "@/components/panels/SectorHeatmap";
 import { AnalystRatings } from "@/components/panels/AnalystRatings";
+import { Portfolio } from "@/components/panels/Portfolio";
+import { AlertsPanel } from "@/components/panels/Alerts";
+import { ComparePanel } from "@/components/panels/Compare";
+import { ScreenerPanel } from "@/components/panels/Screener";
 import type { PanelLayout } from "@/types";
 
 const FULL_WIDTH_PANELS = new Set(["market", "sector"]);
@@ -28,6 +32,10 @@ const PANEL_COMPONENTS: Record<string, React.ComponentType> = {
   earnings: EarningsCalendar,
   sector: SectorHeatmap,
   analysts: AnalystRatings,
+  portfolio: Portfolio,
+  alerts: AlertsPanel,
+  compare: ComparePanel,
+  screener: ScreenerPanel,
 };
 
 export function TerminalGrid() {
@@ -72,7 +80,6 @@ export function TerminalGrid() {
           rowHeight={40}
           margin={[8, 8] as [number, number]}
           containerPadding={[8, 8] as [number, number]}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onLayoutChange={(_current: any, allLayouts: any) => {
             if (allLayouts?.lg) {
               setLayouts(allLayouts.lg as PanelLayout[]);
