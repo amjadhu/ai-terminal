@@ -8,6 +8,7 @@ interface CalendarStore {
     title: string;
     timestamp: number;
     impact: EventImpact;
+    symbol?: string;
   }) => void;
   removeCustomEvent: (id: string) => void;
 }
@@ -16,7 +17,7 @@ export const useCalendarStore = create<CalendarStore>()(
   persist(
     (set) => ({
       customEvents: [],
-      addCustomEvent: ({ title, timestamp, impact }) =>
+      addCustomEvent: ({ title, timestamp, impact, symbol }) =>
         set((state) => ({
           customEvents: [
             ...state.customEvents,
@@ -26,6 +27,7 @@ export const useCalendarStore = create<CalendarStore>()(
               category: "custom",
               impact,
               timestamp,
+              symbol: symbol?.toUpperCase(),
               source: "user",
             },
           ],
@@ -35,6 +37,6 @@ export const useCalendarStore = create<CalendarStore>()(
           customEvents: state.customEvents.filter((e) => e.id !== id),
         })),
     }),
-    { name: "calendar-storage-v1" }
+    { name: "calendar-storage-v2" }
   )
 );

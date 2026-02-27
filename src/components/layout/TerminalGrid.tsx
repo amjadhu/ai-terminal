@@ -47,7 +47,6 @@ const MARKET_PANEL_IDS = new Set([
   "market",
   "intel",
   "watchlist",
-  "calendar",
   "movers",
   "earnings",
   "sector",
@@ -57,6 +56,7 @@ const MARKET_PANEL_IDS = new Set([
 ]);
 
 const SYMBOL_PANEL_IDS = new Set([
+  "calendar",
   "chart",
   "detail",
   "fundamentals",
@@ -65,7 +65,7 @@ const SYMBOL_PANEL_IDS = new Set([
   "news",
 ]);
 
-const FULL_WIDTH_MARKET = new Set(["market", "intel", "sector"]);
+const FULL_WIDTH_MARKET = new Set(["market", "intel", "watchlist", "sector"]);
 
 export function TerminalGrid() {
   const { layouts, setLayouts } = useLayoutStore();

@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 import { useEffect } from "react";
 import { Panel } from "@/components/ui/panel";
-import { useWatchlistStore } from "@/stores/watchlist";
 import { useCalendarStore } from "@/stores/calendar";
 import { useEarnings } from "@/hooks/useMarketData";
 import { buildEventCalendar } from "@/lib/calendar";
+import { useSettingsStore } from "@/stores/settings";
 import type { CalendarEvent, EventImpact } from "@/types";
 
 type WindowKey = "24H" | "7D";
@@ -17,13 +17,17 @@ export function EventClock() {
   const [title, setTitle] = useState("");
   const [dateTime, setDateTime] = useState("");
   const [impact, setImpact] = useState<EventImpact>("medium");
-  const watchlist = useWatchlistStore((s) => s.tickers);
+  const selectedTicker = useSettingsStore((s) => s.selectedTicker);
   const { customEvents, addCustomEvent, removeCustomEvent } = useCalendarStore();
-  const { data, isLoading, error, refetch, dataUpdatedAt } = useEarnings(watchlist);
+  const { data, isLoading, error, refetch, dataUpdatedAt } = useEarnings([selectedTicker]);
 
   const events = useMemo(
-    () => buildEventCalendar(data ?? [], customEvents, nowTs),
-    [data, customEvents, nowTs]
+    () =>
+      buildEventCalendar(data ?? [], customEvents, nowTs, {
+        includeMacro: false,
+        symbol: selectedTicker,
+      }),
+    [data, customEvents, nowTs, selectedTicker]
   );
 
   const horizonMs = windowKey === "24H" ? 24 * 60 * 60_000 : 7 * 24 * 60 * 60_000;
@@ -39,7 +43,7 @@ export function EventClock() {
 
   return (
     <Panel
-      title="Event Clock"
+      title={`Event Clock — ${selectedTicker}`}
       isLoading={isLoading}
       error={error?.message}
       onRetry={() => refetch()}
@@ -49,7 +53,9 @@ export function EventClock() {
       <div className="flex flex-col h-full">
         <div className="border-b border-terminal-border px-3 py-2 flex items-center justify-between gap-2">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-terminal-muted">Next Event</div>
+            <div className="text-[10px] uppercase tracking-wider text-terminal-muted">
+              Next {selectedTicker} Event
+            </div>
             {nextEvent ? (
               <div className="text-sm">
                 <span className="font-semibold text-terminal-accent">{nextEvent.title}</span>
@@ -57,8 +63,13 @@ export function EventClock() {
                 <span className="font-mono">{formatCountdown(nextEvent.timestamp - nowTs)}</span>
               </div>
             ) : (
-              <div className="text-xs text-terminal-muted">No upcoming events</div>
+              <div className="text-xs text-terminal-muted">
+                No upcoming {selectedTicker} events
+              </div>
             )}
+            <div className="text-[10px] text-terminal-muted mt-0.5">
+              Ticker-specific timeline. Watchlist-wide schedule is in Earnings Calendar.
+            </div>
           </div>
           <div className="flex gap-1">
             {(["24H", "7D"] as WindowKey[]).map((key) => (
@@ -93,7 +104,7 @@ export function EventClock() {
             if (!title || !dateTime) return;
             const ts = new Date(dateTime).getTime();
             if (!Number.isFinite(ts)) return;
-            addCustomEvent({ title, timestamp: ts, impact });
+            addCustomEvent({ title, timestamp: ts, impact, symbol: selectedTicker });
             setTitle("");
             setDateTime("");
             setImpact("medium");

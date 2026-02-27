@@ -3,11 +3,21 @@ import type { CalendarEvent, EarningsItem } from "@/types";
 export function buildEventCalendar(
   earnings: EarningsItem[],
   customEvents: CalendarEvent[],
-  now = Date.now()
+  now = Date.now(),
+  options?: {
+    includeMacro?: boolean;
+    symbol?: string;
+  }
 ): CalendarEvent[] {
-  const macro = buildMacroEstimates(now);
+  const includeMacro = options?.includeMacro ?? true;
+  const symbolFilter = options?.symbol?.trim().toUpperCase();
+  const macro = includeMacro ? buildMacroEstimates(now) : [];
   const earningsEvents = earnings
     .filter((e) => !!e.earningsDate)
+    .filter((e) => {
+      if (!symbolFilter) return true;
+      return e.symbol.toUpperCase() === symbolFilter;
+    })
     .map((e) => {
       const [year, month, day] = (e.earningsDate as string).split("-").map(Number);
       const dt = new Date(year, month - 1, day, 16, 0, 0, 0);
@@ -22,7 +32,12 @@ export function buildEventCalendar(
       } as CalendarEvent;
     });
 
-  const all = [...macro, ...earningsEvents, ...customEvents]
+  const custom = customEvents.filter((event) => {
+    if (!symbolFilter) return true;
+    return event.symbol?.toUpperCase() === symbolFilter;
+  });
+
+  const all = [...macro, ...earningsEvents, ...custom]
     .filter((e) => e.timestamp >= now - 30 * 60_000)
     .sort((a, b) => a.timestamp - b.timestamp);
 
