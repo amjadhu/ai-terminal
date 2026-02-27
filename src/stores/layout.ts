@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { PanelLayout } from "@/types";
-import { mergePanelLayouts } from "@/lib/layout";
+import { stabilizeLayouts } from "@/lib/layout";
 
 export const DEFAULT_LAYOUT: PanelLayout[] = [
   // Row 1 — full-width macro bar
@@ -41,7 +41,7 @@ export const useLayoutStore = create<LayoutStore>()(
     (set) => ({
       layouts: DEFAULT_LAYOUT,
       setLayouts: (layouts) =>
-        set({ layouts: mergePanelLayouts(layouts, DEFAULT_LAYOUT) }),
+        set({ layouts: stabilizeLayouts(layouts, DEFAULT_LAYOUT) }),
       resetLayouts: () => set({ layouts: DEFAULT_LAYOUT }),
     }),
     {
@@ -57,7 +57,7 @@ export const useLayoutStore = create<LayoutStore>()(
         return {
           ...currentState,
           ...(persistedState as object),
-          layouts: mergePanelLayouts(persistedLayouts, DEFAULT_LAYOUT),
+          layouts: stabilizeLayouts(persistedLayouts, DEFAULT_LAYOUT),
         };
       },
     }

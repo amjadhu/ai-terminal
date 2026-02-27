@@ -20,6 +20,8 @@ import { ScreenerPanel } from "@/components/panels/Screener";
 import { MarketIntelligence } from "@/components/panels/MarketIntelligence";
 import { EventClock } from "@/components/panels/EventClock";
 import type { PanelLayout } from "@/types";
+import { DEFAULT_LAYOUT } from "@/stores/layout";
+import { stabilizeLayouts } from "@/lib/layout";
 
 const FULL_WIDTH_PANELS = new Set(["market", "intel", "sector"]);
 
@@ -49,32 +51,36 @@ export function TerminalGrid() {
     () => layouts.filter((l) => !!PANEL_COMPONENTS[l.i]),
     [layouts]
   );
+  const stableLayouts = useMemo(
+    () => stabilizeLayouts(validLayouts, DEFAULT_LAYOUT),
+    [validLayouts]
+  );
 
   const lgLayout = useMemo(
-    () => compactRowsHorizontally(validLayouts),
-    [validLayouts]
+    () => compactRowsHorizontally(stableLayouts),
+    [stableLayouts]
   );
   const mdLayout = useMemo(
     () =>
       compactRowsHorizontally(
-        validLayouts.map((l) => ({
+        stableLayouts.map((l) => ({
           ...l,
           w: FULL_WIDTH_PANELS.has(l.i) ? 10 : Math.min(l.w, 5),
           x: FULL_WIDTH_PANELS.has(l.i) ? 0 : l.x % 10,
         }))
       ),
-    [validLayouts]
+    [stableLayouts]
   );
   const smLayout = useMemo(
     () =>
-      validLayouts.map((l, i) => ({
+      stableLayouts.map((l, i) => ({
         ...l,
         x: 0,
         y: i * 6,
         w: 6,
         h: l.i === "market" ? 4 : l.i === "sector" ? 10 : 6,
       })),
-    [validLayouts]
+    [stableLayouts]
   );
 
   return (
@@ -99,11 +105,11 @@ export function TerminalGrid() {
               const cleaned = (typedLayouts.lg ?? []).filter(
                 (l) => !!PANEL_COMPONENTS[l.i]
               );
-              setLayouts(compactRowsHorizontally(cleaned));
+              setLayouts(compactRowsHorizontally(stabilizeLayouts(cleaned, DEFAULT_LAYOUT)));
             }
           }}
         >
-          {validLayouts.map((layout) => {
+          {stableLayouts.map((layout) => {
             const Component = PANEL_COMPONENTS[layout.i];
             return (
               <div key={layout.i}>

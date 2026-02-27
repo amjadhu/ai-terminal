@@ -6,7 +6,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { DEFAULT_LAYOUT, useLayoutStore } from "@/stores/layout";
 import { DEFAULT_WATCHLIST } from "@/lib/constants";
 import { mergeWatchlists } from "@/lib/watchlist";
-import { mergePanelLayouts } from "@/lib/layout";
+import { stabilizeLayouts } from "@/lib/layout";
 
 export function useServerSync() {
   const skipMount = useRef(true);
@@ -34,7 +34,7 @@ export function useServerSync() {
           useSettingsStore.setState({ timeRange: server.timeRange });
         if (server.layouts?.length) {
           useLayoutStore.setState({
-            layouts: mergePanelLayouts(server.layouts, DEFAULT_LAYOUT),
+            layouts: stabilizeLayouts(server.layouts, DEFAULT_LAYOUT),
           });
         }
       })
