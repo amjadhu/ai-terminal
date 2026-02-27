@@ -73,12 +73,16 @@ function EarningsRow({ item }: { item: EarningsItem }) {
             className={`text-[10px] font-semibold ${
               daysUntil === 0
                 ? "text-terminal-accent"
-                : daysUntil <= 7
+                : daysUntil > 0 && daysUntil <= 7
                 ? "text-yellow-400"
+                : daysUntil < 0
+                ? "text-terminal-down"
                 : "text-terminal-muted"
             }`}
           >
-            {daysUntil === 0
+            {daysUntil < 0
+              ? `${Math.abs(daysUntil)}d ago`
+              : daysUntil === 0
               ? "TODAY"
               : daysUntil === 1
               ? "TOMORROW"
@@ -108,5 +112,5 @@ function getDaysUntil(iso: string): number {
   const diff = Math.round(
     (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   );
-  return Math.max(0, diff);
+  return diff;
 }

@@ -14,6 +14,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ data: [] });
     }
 
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
     const results = await Promise.allSettled(
       symbols.map(async (symbol) => {
         const summary: any = await yahooFinance.quoteSummary(symbol, {
@@ -31,10 +34,13 @@ export async function GET(request: Request) {
         const price = summary.price ?? {};
         const trend = summary.earningsTrend ?? {};
 
-        // Next earnings date(s)
-        const earningsDates: Date[] = cal.earnings?.earningsDate ?? [];
-        const nextDate =
-          earningsDates.length > 0 ? new Date(earningsDates[0]) : undefined;
+        // Next upcoming earnings date
+        const rawDates: unknown[] = cal.earnings?.earningsDate ?? [];
+        const earningsDates = rawDates
+          .map((d) => new Date(d as string | number | Date))
+          .filter((d) => !Number.isNaN(d.getTime()))
+          .sort((a, b) => a.getTime() - b.getTime());
+        const nextDate = earningsDates.find((d) => d >= todayStart);
 
         // EPS estimate from calendarEvents
         const epsEstimate = num(cal.earnings?.earningsAverage);
@@ -48,7 +54,7 @@ export async function GET(request: Request) {
         return {
           symbol,
           companyName: price.shortName ?? price.longName ?? symbol,
-          earningsDate: nextDate ? nextDate.toISOString().split("T")[0] : undefined,
+          earningsDate: nextDate ? toIsoDateLocal(nextDate) : undefined,
           epsEstimate,
           revenueEstimate,
           epsActual,
@@ -77,4 +83,11 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
+}
+
+function toIsoDateLocal(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
