@@ -112,3 +112,23 @@ body {
 .flash-down {
   animation: flash-red 0.8s ease-out;
 }
+
+/* Header ticker tape */
+.ticker-marquee {
+  white-space: nowrap;
+}
+
+.ticker-marquee-track {
+  display: inline-block;
+  min-width: 200%;
+  animation: ticker-scroll 36s linear infinite;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
