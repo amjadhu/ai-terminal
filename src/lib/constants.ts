@@ -1,4 +1,55 @@
-export const DEFAULT_WATCHLIST = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"];
+export const DEFAULT_WATCHLIST = [
+  // Indices
+  "^DJI",
+  "^GSPC",
+  "^IXIC",
+  "^NYA",
+  // Tech & Software
+  "AAPL",
+  "AMZN",
+  "ARM",
+  "BILL",
+  "BKNG",
+  "CRM",
+  "CRWD",
+  "DDOG",
+  "DOCU",
+  "ESTC",
+  "GOOG",
+  "GTLB",
+  "IBM",
+  "INTC",
+  "INTU",
+  "META",
+  "MSFT",
+  "NFLX",
+  "NVDA",
+  "OKTA",
+  "ORCL",
+  "PANW",
+  "PLTR",
+  "RBLX",
+  "SHOP",
+  "SNOW",
+  "TDOC",
+  "TMUS",
+  // Finance & Payments
+  "BAH",
+  "COIN",
+  "PYPL",
+  // Other
+  "EA",
+  "EBAY",
+  "LYFT",
+  "RIVN",
+  "SBUX",
+  "TSLA",
+  "UBER",
+  "WMT",
+  // Crypto
+  "BTC-USD",
+  "ETH-USD",
+];
 
 export const MARKET_INDICES = [
   { symbol: "^GSPC", name: "S&P 500" },

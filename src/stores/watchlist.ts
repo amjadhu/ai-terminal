@@ -23,6 +23,28 @@ export const useWatchlistStore = create<WatchlistStore>()(
           tickers: state.tickers.filter((t) => t !== symbol.toUpperCase()),
         })),
     }),
-    { name: "watchlist-storage" }
+    {
+      name: "watchlist-storage",
+      merge: (persistedState, currentState) => {
+        const persistedTickers = Array.isArray(
+          (persistedState as Partial<WatchlistStore> | undefined)?.tickers
+        )
+          ? (persistedState as Partial<WatchlistStore>).tickers ?? []
+          : [];
+
+        const mergedTickers = [
+          ...new Set([
+            ...DEFAULT_WATCHLIST,
+            ...persistedTickers.map((t) => t.toUpperCase()),
+          ]),
+        ];
+
+        return {
+          ...currentState,
+          ...(persistedState as object),
+          tickers: mergedTickers,
+        };
+      },
+    }
   )
 );
