@@ -228,11 +228,11 @@ export default function StockChartInner({
     <div className="relative w-full h-full">
       <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
       <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
-        <LegendTag
-          color="#00dc82"
-          label={`${mainSymbol} ${latest ? latest.close.toFixed(2) : "—"}`}
-          tooltip={`${mainSymbol} latest close price`}
-        />
+          <LegendTag
+            color="#00dc82"
+            label={`${mainSymbol} ${latest ? latest.close.toFixed(2) : "—"}`}
+            tooltip={`${mainSymbol} latest close price`}
+          />
         {compareSymbol && compareIndexed !== undefined && (
           <LegendTag
             color="#a78bfa"
@@ -305,8 +305,8 @@ function LegendTag({
 }) {
   return (
     <div
-      className="flex items-center gap-1.5 px-2 py-1 rounded border border-terminal-border bg-terminal-panel/85 backdrop-blur-sm"
-      title={tooltip}
+      className="flex items-center gap-1.5 px-2 py-1 rounded border border-terminal-border bg-terminal-panel/85 backdrop-blur-sm terminal-tooltip"
+      data-tooltip={tooltip}
     >
       <span
         className={`w-3 h-0.5 ${dashed ? "border-t-2 border-dashed" : ""}`}

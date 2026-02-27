@@ -66,8 +66,8 @@ export function Watchlist() {
               <th className="text-right px-2 py-1.5 font-medium">Chg</th>
               <th className="text-right px-2 py-1.5 font-medium">%</th>
               <th
-                className="text-right px-2 py-1.5 font-medium"
-                title="Signal score for urgency: CALM, WATCH, or HOT"
+                className="text-right px-2 py-1.5 font-medium terminal-tooltip"
+                data-tooltip="Signal score for urgency: CALM, WATCH, or HOT"
               >
                 Sig
               </th>

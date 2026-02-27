@@ -165,8 +165,8 @@ function CompanyView({ data }: { data: DeepDiveCompanyData }) {
             >
               <div className="flex justify-between gap-2 text-[10px]">
                 <span
-                  className="text-terminal-accent uppercase"
-                  title="Estimated strength of potential market impact (higher = stronger)"
+                  className="text-terminal-accent uppercase terminal-tooltip"
+                  data-tooltip="Estimated strength of potential market impact (higher = stronger)"
                 >
                   Impact {item.impactScore}
                 </span>
@@ -259,8 +259,8 @@ function SectorView({ data }: { data: DeepDiveSectorData }) {
             >
               <div className="flex justify-between gap-2 text-[10px]">
                 <span
-                  className="text-terminal-accent uppercase"
-                  title="Estimated strength of potential market impact (higher = stronger)"
+                  className="text-terminal-accent uppercase terminal-tooltip"
+                  data-tooltip="Estimated strength of potential market impact (higher = stronger)"
                 >
                   Impact {item.impactScore}
                 </span>
@@ -297,8 +297,8 @@ function Stat({
   return (
     <div className="rounded border border-terminal-border p-2">
       <div
-        className="text-[10px] uppercase tracking-wider text-terminal-muted"
-        title={tooltip}
+        className="text-[10px] uppercase tracking-wider text-terminal-muted terminal-tooltip"
+        data-tooltip={tooltip}
       >
         {label}
       </div>

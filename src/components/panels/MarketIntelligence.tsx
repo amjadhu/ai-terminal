@@ -53,8 +53,8 @@ export function MarketIntelligence() {
         <section className="p-3 flex flex-col justify-between bg-[linear-gradient(180deg,rgba(255,140,0,0.08),rgba(255,140,0,0.02))]">
           <div>
             <div
-              className="text-[10px] uppercase tracking-widest text-terminal-muted"
-              title="Overall market tone from breadth, trend, and volatility"
+              className="text-[10px] uppercase tracking-widest text-terminal-muted terminal-tooltip"
+              data-tooltip="Overall market tone from breadth, trend, and volatility"
             >
               Regime
             </div>
@@ -159,8 +159,8 @@ export function MarketIntelligence() {
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <span
-                    className="text-terminal-accent text-[10px] uppercase tracking-wider"
-                    title="Estimated strength of potential market impact (higher = stronger)"
+                    className="text-terminal-accent text-[10px] uppercase tracking-wider terminal-tooltip"
+                    data-tooltip="Estimated strength of potential market impact (higher = stronger)"
                   >
                     impact {item.impactScore}
                   </span>
@@ -198,7 +198,10 @@ function Metric({ label, value }: { label: string; value: string }) {
 
   return (
     <div className="flex justify-between">
-      <span className="text-terminal-muted" title={tooltipByLabel[label]}>
+      <span
+        className="text-terminal-muted terminal-tooltip"
+        data-tooltip={tooltipByLabel[label]}
+      >
         {label}
       </span>
       <span className="font-mono">{value}</span>

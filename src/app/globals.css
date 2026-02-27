@@ -150,3 +150,59 @@ body {
     transform: translateX(-50%);
   }
 }
+
+/* Immediate tooltip for metric labels */
+.terminal-tooltip {
+  position: relative;
+}
+
+.terminal-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translate(-50%, 4px);
+  min-width: 120px;
+  max-width: min(280px, 80vw);
+  padding: 6px 8px;
+  border: 1px solid var(--color-terminal-border);
+  border-radius: 6px;
+  background: var(--color-terminal-panel);
+  color: var(--color-terminal-text);
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 80;
+  transition: opacity 90ms linear, transform 120ms ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.terminal-tooltip::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--color-terminal-border);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 80;
+  transition: opacity 90ms linear;
+}
+
+.terminal-tooltip:hover::after,
+.terminal-tooltip:hover::before,
+.terminal-tooltip:focus-visible::after,
+.terminal-tooltip:focus-visible::before {
+  opacity: 1;
+}
+
+.terminal-tooltip:hover::after,
+.terminal-tooltip:focus-visible::after {
+  transform: translate(-50%, 0);
+}

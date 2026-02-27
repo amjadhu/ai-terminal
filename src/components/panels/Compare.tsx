@@ -110,8 +110,8 @@ export function ComparePanel() {
             {rows.map((r) => (
               <tr key={r.label} className="border-b border-terminal-border/50">
                 <td
-                  className="px-3 py-1.5 text-terminal-muted"
-                  title={metricTooltipByLabel[r.label]}
+                  className="px-3 py-1.5 text-terminal-muted terminal-tooltip"
+                  data-tooltip={metricTooltipByLabel[r.label]}
                 >
                   {r.label}
                 </td>

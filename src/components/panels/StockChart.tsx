@@ -52,8 +52,8 @@ export function StockChart() {
             </button>
           ))}
           <label
-            className="ml-2 text-[10px] text-terminal-muted flex items-center gap-1"
-            title="20-day simple moving average"
+            className="ml-2 text-[10px] text-terminal-muted flex items-center gap-1 terminal-tooltip"
+            data-tooltip="20-day simple moving average"
           >
             <input
               type="checkbox"
@@ -63,8 +63,8 @@ export function StockChart() {
             SMA20
           </label>
           <label
-            className="text-[10px] text-terminal-muted flex items-center gap-1"
-            title="50-day simple moving average"
+            className="text-[10px] text-terminal-muted flex items-center gap-1 terminal-tooltip"
+            data-tooltip="50-day simple moving average"
           >
             <input
               type="checkbox"
