@@ -9,11 +9,19 @@ import { formatPercent, formatPrice } from "@/lib/utils";
 export function ComparePanel() {
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
   const [peer, setPeer] = useState("MSFT");
+  const [peerInput, setPeerInput] = useState("MSFT");
 
   const left = useStockQuote(selectedTicker);
   const right = useStockQuote(peer);
   const leftFund = useFundamentals(selectedTicker);
   const rightFund = useFundamentals(peer);
+  const compareError = right.error?.message ?? rightFund.error?.message ?? null;
+
+  const applyPeer = () => {
+    const next = peerInput.trim().toUpperCase();
+    if (!next) return;
+    setPeer(next);
+  };
 
   const rows = useMemo(
     () => [
@@ -72,8 +80,8 @@ export function ComparePanel() {
   return (
     <Panel
       title={`Compare ${selectedTicker} vs ${peer}`}
-      isLoading={left.isLoading || right.isLoading || leftFund.isLoading || rightFund.isLoading}
-      error={left.error?.message ?? right.error?.message ?? leftFund.error?.message ?? rightFund.error?.message}
+      isLoading={left.isLoading || leftFund.isLoading || right.isLoading || rightFund.isLoading}
+      error={left.error?.message ?? leftFund.error?.message}
       onRetry={() => {
         left.refetch();
         right.refetch();
@@ -92,12 +100,41 @@ export function ComparePanel() {
         <div className="border-b border-terminal-border p-2 flex items-center gap-2">
           <span className="text-xs text-terminal-muted">Peer:</span>
           <input
-            value={peer}
-            onChange={(e) => setPeer(e.target.value.toUpperCase())}
+            value={peerInput}
+            onChange={(e) => setPeerInput(e.target.value.toUpperCase())}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                applyPeer();
+              } else if (e.key === "Escape") {
+                setPeerInput(peer);
+              }
+            }}
             className="bg-terminal-bg border border-terminal-border rounded px-2 py-1 text-xs font-mono"
-            placeholder="Ticker"
+            placeholder="Ticker (press Enter)"
           />
+          <button
+            onClick={applyPeer}
+            className="px-2 py-1 text-xs rounded bg-terminal-accent text-terminal-bg font-semibold"
+          >
+            Apply
+          </button>
+          <button
+            onClick={() => {
+              setPeer("MSFT");
+              setPeerInput("MSFT");
+            }}
+            className="px-2 py-1 text-xs rounded border border-terminal-border text-terminal-muted hover:text-terminal-text hover:bg-terminal-hover"
+          >
+            Reset
+          </button>
         </div>
+        {compareError && (
+          <div className="px-3 py-2 border-b border-terminal-border text-xs text-terminal-down">
+            Compare symbol <span className="font-mono">{peer}</span> not found.
+            Update the ticker and click Apply.
+          </div>
+        )}
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-terminal-border text-terminal-muted">
