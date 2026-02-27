@@ -57,10 +57,9 @@ function isTopWorkspaceHealthy(layouts: PanelLayout[]): boolean {
   if (!watchlist || !chart || !calendar) return false;
   if (watchlist.w < 2 || chart.w < 4 || calendar.w < 2) return false;
 
-  // Core workspace should be on one band and reasonably fill row width.
-  const yBand = Math.min(watchlist.y, chart.y, calendar.y);
-  const coreOnBand = [watchlist, chart, calendar].filter((p) => p.y === yBand);
-  const occupiedCols = coreOnBand.reduce((sum, p) => sum + p.w, 0);
+  // In the market section, watchlist + calendar should not leave a tiny strip.
+  if (watchlist.y !== calendar.y) return false;
+  const occupiedCols = watchlist.w + calendar.w;
 
-  return occupiedCols >= 10;
+  return occupiedCols >= 5;
 }

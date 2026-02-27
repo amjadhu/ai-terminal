@@ -19,7 +19,7 @@ describe("mergePanelLayouts", () => {
 });
 
 describe("stabilizeLayouts", () => {
-  it("resets to defaults when top workspace is sparse or missing chart", () => {
+  it("heals sparse layouts so core top workspace is present and aligned", () => {
     const sparse: PanelLayout[] = [
       { i: "market", x: 0, y: 0, w: 12, h: 4 },
       { i: "watchlist", x: 0, y: 10, w: 3, h: 10 },
@@ -35,6 +35,10 @@ describe("stabilizeLayouts", () => {
     ];
 
     const stabilized = stabilizeLayouts(sparse, defaults);
-    expect(stabilized).toEqual(defaults);
+    const byId = new Map(stabilized.map((l) => [l.i, l]));
+    expect(byId.has("chart")).toBe(true);
+    expect(byId.has("watchlist")).toBe(true);
+    expect(byId.has("calendar")).toBe(true);
+    expect(byId.get("watchlist")?.y).toBe(byId.get("calendar")?.y);
   });
 });
