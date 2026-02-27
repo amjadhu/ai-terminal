@@ -14,6 +14,6 @@ describe("mergePanelLayouts", () => {
     ];
 
     const merged = mergePanelLayouts(incoming, defaults);
-    expect(merged.map((m) => m.i)).toEqual(["watchlist", "chart", "market"]);
+    expect(merged.map((m) => m.i)).toEqual(["market", "watchlist", "chart"]);
   });
 });
