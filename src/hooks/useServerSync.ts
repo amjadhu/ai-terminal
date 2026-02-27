@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useWatchlistStore } from "@/stores/watchlist";
 import { useSettingsStore } from "@/stores/settings";
 import { useLayoutStore } from "@/stores/layout";
+import { DEFAULT_WATCHLIST } from "@/lib/constants";
 
 export function useServerSync() {
   const skipMount = useRef(true);
@@ -21,8 +22,15 @@ export function useServerSync() {
       .then((r) => r.json())
       .then((server) => {
         console.log("[sync] server state:", server);
-        if (server.tickers?.length)
-          useWatchlistStore.setState({ tickers: server.tickers });
+        if (server.tickers?.length) {
+          const mergedTickers = [
+            ...new Set([
+              ...DEFAULT_WATCHLIST,
+              ...server.tickers.map((t: string) => t.toUpperCase()),
+            ]),
+          ];
+          useWatchlistStore.setState({ tickers: mergedTickers });
+        }
         if (server.selectedTicker)
           useSettingsStore.setState({ selectedTicker: server.selectedTicker });
         if (server.timeRange)
