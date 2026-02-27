@@ -116,7 +116,7 @@ async function buildSectorDeepDive(
   label: string,
   symbols: string[]
 ): Promise<DeepDiveData> {
-  const quotes = await Promise.all(
+  const quoteResults = await Promise.allSettled(
     symbols.map(async (symbol) => {
       const q = await yahooFinance.quote(symbol);
       return {
@@ -125,6 +125,8 @@ async function buildSectorDeepDive(
       };
     })
   );
+  const quotes = quoteResults
+    .flatMap((r) => (r.status === "fulfilled" ? [r.value] : []));
 
   const sorted = quotes.slice().sort((a, b) => b.changePercent - a.changePercent);
   const leaders = sorted.slice(0, 5);
@@ -138,23 +140,31 @@ async function buildSectorDeepDive(
       ? quotes.reduce((sum, q) => sum + q.changePercent, 0) / quotes.length
       : 0;
 
-  const newsSearch = await yahooFinance.search(query, { quotesCount: 0, newsCount: 18 });
-  const news = ((newsSearch.news ?? []) as Array<{
-    title: string;
-    link: string;
-    publisher: string;
-    providerPublishTime: string | number | Date;
-  }>)
-    .map((n) =>
-      enrichNewsItem({
-        title: n.title,
-        link: n.link,
-        publisher: n.publisher,
-        providerPublishTime: new Date(n.providerPublishTime).getTime(),
-      })
-    )
-    .sort((a, b) => b.impactScore - a.impactScore)
-    .slice(0, 12);
+  let news: ReturnType<typeof enrichNewsItem>[] = [];
+  try {
+    const newsSearch = await yahooFinance.search(query, {
+      quotesCount: 0,
+      newsCount: 18,
+    });
+    news = ((newsSearch.news ?? []) as Array<{
+      title: string;
+      link: string;
+      publisher: string;
+      providerPublishTime: string | number | Date;
+    }>)
+      .map((n) =>
+        enrichNewsItem({
+          title: n.title,
+          link: n.link,
+          publisher: n.publisher,
+          providerPublishTime: new Date(n.providerPublishTime).getTime(),
+        })
+      )
+      .sort((a, b) => b.impactScore - a.impactScore)
+      .slice(0, 12);
+  } catch {
+    news = [];
+  }
 
   return {
     type: "sector",
@@ -164,7 +174,7 @@ async function buildSectorDeepDive(
     avgChangePercent,
     leaders,
     laggards,
-    symbols,
+    symbols: quotes.length > 0 ? quotes.map((q) => q.symbol) : symbols,
     trends: buildSectorTrends({ breadthPercent, avgChangePercent }),
     news,
   };
