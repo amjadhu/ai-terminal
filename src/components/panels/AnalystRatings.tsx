@@ -59,7 +59,10 @@ function RatingsContent({ data }: { data: AnalystData }) {
       {/* Consensus rating */}
       <div className="flex items-center justify-between px-3 py-3">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[9px] uppercase tracking-widest text-terminal-muted">
+          <span
+            className="text-[9px] uppercase tracking-widest text-terminal-muted terminal-tooltip"
+            data-tooltip="Overall analyst recommendation for this stock"
+          >
             Consensus
           </span>
           {cfg ? (
@@ -73,7 +76,10 @@ function RatingsContent({ data }: { data: AnalystData }) {
             <span className="text-sm text-terminal-muted">—</span>
           )}
           {data.numberOfAnalysts !== undefined && (
-            <span className="text-[10px] text-terminal-muted">
+            <span
+              className="text-[10px] text-terminal-muted terminal-tooltip"
+              data-tooltip="Number of analysts included in this consensus"
+            >
               {data.numberOfAnalysts} analysts
             </span>
           )}
@@ -97,7 +103,8 @@ function RatingsContent({ data }: { data: AnalystData }) {
             <span
               className={`text-xs font-semibold font-mono ${
                 upside >= 0 ? "text-terminal-up" : "text-terminal-down"
-              }`}
+              } terminal-tooltip`}
+              data-tooltip="Percent difference between analyst mean target and current price"
             >
               {upside >= 0 ? "+" : ""}
               {upside.toFixed(1)}% upside
@@ -155,7 +162,10 @@ function ScoreGauge({ score }: { score: number }) {
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <div className="relative w-10 h-10">
+      <div
+        className="relative w-10 h-10 terminal-tooltip"
+        data-tooltip="Analyst mean rating: 1.0 = Strong Buy, 3.0 = Hold, 5.0 = Sell"
+      >
         <svg viewBox="0 0 40 40" className="w-full h-full -rotate-90">
           <circle
             cx="20" cy="20" r="16"
@@ -179,7 +189,12 @@ function ScoreGauge({ score }: { score: number }) {
           {score.toFixed(1)}
         </span>
       </div>
-      <span className="text-[8px] text-terminal-muted">/ 5.0</span>
+      <span
+        className="text-[8px] text-terminal-muted terminal-tooltip"
+        data-tooltip="Scale max is 5.0; lower numbers are better"
+      >
+        / 5.0
+      </span>
     </div>
   );
 }
@@ -206,16 +221,16 @@ function PriceTargetBar({
     <div className="relative h-2 rounded-full bg-terminal-border mt-1">
       {/* Mean marker */}
       <div
-        className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-terminal-accent z-10"
+        className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-terminal-accent z-10 terminal-tooltip"
         style={{ left: `calc(${pos(mean)}% - 4px)` }}
-        title={`Mean: $${mean.toFixed(2)}`}
+        data-tooltip={`Analyst mean target: $${mean.toFixed(2)}`}
       />
       {/* Current price marker */}
       {current > 0 && (
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-1.5 h-3 rounded-sm bg-terminal-text z-20"
+          className="absolute top-1/2 -translate-y-1/2 w-1.5 h-3 rounded-sm bg-terminal-text z-20 terminal-tooltip"
           style={{ left: `calc(${pos(current)}% - 3px)` }}
-          title={`Current: $${current.toFixed(2)}`}
+          data-tooltip={`Current price: $${current.toFixed(2)}`}
         />
       )}
       {/* Fill to mean */}
