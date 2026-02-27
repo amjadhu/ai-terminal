@@ -16,9 +16,11 @@ export function useServerSync() {
 
   // On mount: hydrate all stores from server (server wins over localStorage)
   useEffect(() => {
+    console.log("[sync] fetching server state...");
     fetch("/api/state")
       .then((r) => r.json())
       .then((server) => {
+        console.log("[sync] server state:", server);
         if (server.tickers?.length)
           useWatchlistStore.setState({ tickers: server.tickers });
         if (server.selectedTicker)
@@ -28,7 +30,7 @@ export function useServerSync() {
         if (server.layouts?.length)
           useLayoutStore.setState({ layouts: server.layouts });
       })
-      .catch(() => {});
+      .catch((err) => console.error("[sync] GET failed:", err));
   }, []);
 
   // Debounce-write on any state change, skipping the initial mount run
@@ -39,11 +41,15 @@ export function useServerSync() {
     }
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
+      console.log("[sync] writing state to server...");
       fetch("/api/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tickers, selectedTicker, timeRange, layouts }),
-      }).catch(() => {});
+      })
+        .then((r) => r.json())
+        .then((res) => console.log("[sync] PUT result:", res))
+        .catch((err) => console.error("[sync] PUT failed:", err));
     }, 1500);
     return () => clearTimeout(timer.current);
   }, [tickers, selectedTicker, timeRange, layouts]);
