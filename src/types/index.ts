@@ -235,3 +235,22 @@ export interface ScreenerRow {
   revenueGrowth?: number;
   grossMargins?: number;
 }
+
+// ─── Insights ────────────────────────────────────────────────────────────────
+
+export type WatchlistSignal = "HOT" | "WATCH" | "CALM";
+
+export interface WatchlistPriorityInsight {
+  score: number;
+  signal: WatchlistSignal;
+  reasons: string[];
+}
+
+export interface MarketRegime {
+  score: number;
+  label: "RISK-ON" | "MIXED" | "RISK-OFF";
+  confidence: number;
+  breadthPercent: number;
+  vix?: number;
+  spxChangePercent?: number;
+}

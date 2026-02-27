@@ -17,12 +17,14 @@ import { Portfolio } from "@/components/panels/Portfolio";
 import { AlertsPanel } from "@/components/panels/Alerts";
 import { ComparePanel } from "@/components/panels/Compare";
 import { ScreenerPanel } from "@/components/panels/Screener";
+import { MarketIntelligence } from "@/components/panels/MarketIntelligence";
 import type { PanelLayout } from "@/types";
 
-const FULL_WIDTH_PANELS = new Set(["market", "sector"]);
+const FULL_WIDTH_PANELS = new Set(["market", "intel", "sector"]);
 
 const PANEL_COMPONENTS: Record<string, React.ComponentType> = {
   market: MarketOverview,
+  intel: MarketIntelligence,
   watchlist: Watchlist,
   chart: StockChart,
   detail: TickerDetail,
