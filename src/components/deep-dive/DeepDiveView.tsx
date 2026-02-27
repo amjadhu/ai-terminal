@@ -79,8 +79,62 @@ export function DeepDiveView() {
           {error.message}
         </div>
       )}
+      {!isLoading && !error && !data && (
+        <DeepDiveLanding
+          onSelect={(value) => {
+            setQuery(value);
+            setSubmittedQuery(value);
+            setPersistedQuery(value);
+          }}
+        />
+      )}
       {data?.type === "company" && <CompanyView data={data} />}
       {data?.type === "sector" && <SectorView data={data} />}
+    </div>
+  );
+}
+
+function DeepDiveLanding({ onSelect }: { onSelect: (value: string) => void }) {
+  const sectors = [
+    "technology",
+    "cybersecurity",
+    "semiconductors",
+    "financials",
+    "energy",
+    "healthcare",
+  ];
+  const focus = ["earnings quality", "valuation reset", "AI demand", "rate sensitivity"];
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-2">
+      <section className="xl:col-span-2 rounded-lg border border-terminal-border bg-terminal-panel p-3">
+        <h3 className="text-xs uppercase tracking-wider text-terminal-muted">Start With A Theme</h3>
+        <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2">
+          {sectors.map((item) => (
+            <button
+              key={item}
+              onClick={() => onSelect(item)}
+              className="text-left rounded border border-terminal-border px-3 py-2 text-sm font-mono text-terminal-accent hover:bg-terminal-hover transition-colors"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </section>
+      <section className="rounded-lg border border-terminal-border bg-terminal-panel p-3">
+        <h3 className="text-xs uppercase tracking-wider text-terminal-muted">Suggested Angles</h3>
+        <div className="mt-2 space-y-1">
+          {focus.map((item) => (
+            <button
+              key={item}
+              onClick={() => onSelect(item)}
+              className="w-full text-left rounded border border-terminal-border px-2 py-1.5 text-xs text-terminal-text hover:bg-terminal-hover transition-colors"
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

@@ -86,7 +86,10 @@ export function TerminalGrid() {
     [stableLayouts]
   );
 
-  const marketLg = useMemo(() => compactRowsHorizontally(marketLayouts, FULL_WIDTH_MARKET), [marketLayouts]);
+  const marketLg = useMemo(
+    () => compactRowsHorizontally(marketLayouts, FULL_WIDTH_MARKET, 12),
+    [marketLayouts]
+  );
   const marketMd = useMemo(
     () =>
       compactRowsHorizontally(
@@ -95,7 +98,8 @@ export function TerminalGrid() {
           w: FULL_WIDTH_MARKET.has(l.i) ? 10 : Math.min(l.w, 5),
           x: FULL_WIDTH_MARKET.has(l.i) ? 0 : l.x % 10,
         })),
-        FULL_WIDTH_MARKET
+        FULL_WIDTH_MARKET,
+        10
       ),
     [marketLayouts]
   );
@@ -111,7 +115,10 @@ export function TerminalGrid() {
     [marketLayouts]
   );
 
-  const symbolLg = useMemo(() => compactRowsHorizontally(symbolLayouts, new Set()), [symbolLayouts]);
+  const symbolLg = useMemo(
+    () => compactRowsHorizontally(symbolLayouts, new Set(), 12),
+    [symbolLayouts]
+  );
   const symbolMd = useMemo(
     () =>
       compactRowsHorizontally(
@@ -120,7 +127,8 @@ export function TerminalGrid() {
           w: Math.min(l.w, 5),
           x: l.x % 10,
         })),
-        new Set()
+        new Set(),
+        10
       ),
     [symbolLayouts]
   );
@@ -237,7 +245,8 @@ function normalizeSectionRows(layouts: PanelLayout[]): PanelLayout[] {
 
 function compactRowsHorizontally(
   layouts: PanelLayout[],
-  fullWidthPanels: Set<string>
+  fullWidthPanels: Set<string>,
+  totalCols: number
 ): PanelLayout[] {
   const rows = new Map<number, PanelLayout[]>();
   for (const item of layouts) {
@@ -251,15 +260,27 @@ function compactRowsHorizontally(
     .sort((a, b) => a[0] - b[0])
     .forEach(([, row]) => {
       row.sort((a, b) => a.x - b.x);
+      const hasFullWidth = row.some((item) => fullWidthPanels.has(item.i));
+      if (hasFullWidth && row.length === 1) {
+        row.forEach((item) => {
+          if (!fullWidthPanels.has(item.i)) return;
+          item.x = 0;
+          item.w = totalCols;
+          compacted.push(item);
+        });
+        return;
+      }
+
+      const sumWidth = row.reduce((sum, item) => sum + item.w, 0);
+      const deficit = Math.max(0, totalCols - sumWidth);
+      if (deficit > 0 && row.length > 0) {
+        row[row.length - 1].w += deficit;
+      }
+
       let nextX = 0;
       row.forEach((item) => {
-        if (fullWidthPanels.has(item.i)) {
-          item.x = 0;
-          nextX = item.w;
-        } else {
-          item.x = nextX;
-          nextX += item.w;
-        }
+        item.x = nextX;
+        nextX += item.w;
         compacted.push(item);
       });
     });
