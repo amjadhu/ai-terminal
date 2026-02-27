@@ -50,14 +50,19 @@ export function TerminalGrid() {
     [layouts]
   );
 
-  const lgLayout = useMemo(() => validLayouts, [validLayouts]);
+  const lgLayout = useMemo(
+    () => compactRowsHorizontally(validLayouts),
+    [validLayouts]
+  );
   const mdLayout = useMemo(
     () =>
-      validLayouts.map((l) => ({
-        ...l,
-        w: FULL_WIDTH_PANELS.has(l.i) ? 10 : Math.min(l.w, 5),
-        x: FULL_WIDTH_PANELS.has(l.i) ? 0 : l.x % 10,
-      })),
+      compactRowsHorizontally(
+        validLayouts.map((l) => ({
+          ...l,
+          w: FULL_WIDTH_PANELS.has(l.i) ? 10 : Math.min(l.w, 5),
+          x: FULL_WIDTH_PANELS.has(l.i) ? 0 : l.x % 10,
+        }))
+      ),
     [validLayouts]
   );
   const smLayout = useMemo(
@@ -91,10 +96,10 @@ export function TerminalGrid() {
           onLayoutChange={(_current: unknown, allLayouts: unknown) => {
             const typedLayouts = allLayouts as { lg?: PanelLayout[] } | undefined;
             if (typedLayouts?.lg) {
-              const cleaned = (typedLayouts?.lg ?? []).filter(
+              const cleaned = (typedLayouts.lg ?? []).filter(
                 (l) => !!PANEL_COMPONENTS[l.i]
               );
-              setLayouts(cleaned);
+              setLayouts(compactRowsHorizontally(cleaned));
             }
           }}
         >
@@ -110,4 +115,33 @@ export function TerminalGrid() {
       )}
     </div>
   );
+}
+
+function compactRowsHorizontally(layouts: PanelLayout[]): PanelLayout[] {
+  const rows = new Map<number, PanelLayout[]>();
+  for (const item of layouts) {
+    const key = item.y;
+    if (!rows.has(key)) rows.set(key, []);
+    rows.get(key)?.push({ ...item });
+  }
+
+  const compacted: PanelLayout[] = [];
+  Array.from(rows.entries())
+    .sort((a, b) => a[0] - b[0])
+    .forEach(([, row]) => {
+      row.sort((a, b) => a.x - b.x);
+      let nextX = 0;
+      row.forEach((item) => {
+        if (FULL_WIDTH_PANELS.has(item.i)) {
+          item.x = 0;
+          nextX = item.w;
+        } else {
+          item.x = nextX;
+          nextX += item.w;
+        }
+        compacted.push(item);
+      });
+    });
+
+  return compacted;
 }
