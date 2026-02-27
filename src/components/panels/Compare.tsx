@@ -3,8 +3,19 @@
 import { useMemo, useState } from "react";
 import { Panel } from "@/components/ui/panel";
 import { useSettingsStore } from "@/stores/settings";
-import { useFundamentals, useStockQuote } from "@/hooks/useMarketData";
-import { formatPercent, formatPrice } from "@/lib/utils";
+import { useAnalysts, useFundamentals, useStockQuote } from "@/hooks/useMarketData";
+import { formatPercent } from "@/lib/utils";
+
+type Direction = "higher" | "lower";
+type CompareMetric = {
+  group: "Valuation" | "Growth" | "Quality" | "Risk";
+  label: string;
+  tooltip: string;
+  direction: Direction;
+  left?: number;
+  right?: number;
+  format: "percent" | "ratio" | "multiple" | "score";
+};
 
 export function ComparePanel() {
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
@@ -15,7 +26,13 @@ export function ComparePanel() {
   const right = useStockQuote(peer);
   const leftFund = useFundamentals(selectedTicker);
   const rightFund = useFundamentals(peer);
-  const compareError = right.error?.message ?? rightFund.error?.message ?? null;
+  const leftAnalyst = useAnalysts(selectedTicker);
+  const rightAnalyst = useAnalysts(peer);
+  const compareError =
+    right.error?.message ??
+    rightFund.error?.message ??
+    rightAnalyst.error?.message ??
+    null;
 
   const applyPeer = () => {
     const next = peerInput.trim().toUpperCase();
@@ -23,76 +40,210 @@ export function ComparePanel() {
     setPeer(next);
   };
 
-  const rows = useMemo(
-    () => [
+  const metrics = useMemo<CompareMetric[]>(() => {
+    const lq = left.data;
+    const rq = right.data;
+    const lf = leftFund.data;
+    const rf = rightFund.data;
+    const la = leftAnalyst.data;
+    const ra = rightAnalyst.data;
+
+    const fcfMargin = (freeCashflow?: number, revenue?: number) =>
+      freeCashflow !== undefined && revenue !== undefined && revenue !== 0
+        ? (freeCashflow / revenue) * 100
+        : undefined;
+
+    const targetUpside = (target?: number, price?: number) =>
+      target !== undefined && price !== undefined && price > 0
+        ? ((target - price) / price) * 100
+        : undefined;
+
+    return [
       {
-        label: "Price",
-        left: left.data ? `$${formatPrice(left.data.regularMarketPrice)}` : "—",
-        right: right.data ? `$${formatPrice(right.data.regularMarketPrice)}` : "—",
+        group: "Valuation",
+        label: "P/E (TTM)",
+        tooltip: "Price divided by trailing 12-month earnings",
+        direction: "lower",
+        left: lq?.trailingPE,
+        right: rq?.trailingPE,
+        format: "multiple",
       },
       {
-        label: "1D %",
-        left: left.data ? formatPercent(left.data.regularMarketChangePercent) : "—",
-        right: right.data ? formatPercent(right.data.regularMarketChangePercent) : "—",
+        group: "Valuation",
+        label: "EV / Revenue",
+        tooltip: "Enterprise value divided by annual revenue",
+        direction: "lower",
+        left: lf?.enterpriseToRevenue,
+        right: rf?.enterpriseToRevenue,
+        format: "multiple",
       },
       {
-        label: "P/E",
-        left: left.data?.trailingPE?.toFixed(2) ?? "—",
-        right: right.data?.trailingPE?.toFixed(2) ?? "—",
+        group: "Valuation",
+        label: "EV / EBITDA",
+        tooltip: "Enterprise value divided by EBITDA",
+        direction: "lower",
+        left: lf?.enterpriseToEbitda,
+        right: rf?.enterpriseToEbitda,
+        format: "multiple",
       },
       {
-        label: "Rev Growth",
-        left:
-          leftFund.data?.revenueGrowth !== undefined
-            ? formatPercent(leftFund.data.revenueGrowth * 100)
-            : "—",
-        right:
-          rightFund.data?.revenueGrowth !== undefined
-            ? formatPercent(rightFund.data.revenueGrowth * 100)
-            : "—",
+        group: "Valuation",
+        label: "PEG",
+        tooltip: "P/E adjusted for growth (lower can imply better value vs growth)",
+        direction: "lower",
+        left: lf?.pegRatio,
+        right: rf?.pegRatio,
+        format: "ratio",
       },
       {
+        group: "Growth",
+        label: "Revenue Growth (YoY)",
+        tooltip: "Year-over-year revenue growth",
+        direction: "higher",
+        left: lf?.revenueGrowth !== undefined ? lf.revenueGrowth * 100 : undefined,
+        right: rf?.revenueGrowth !== undefined ? rf.revenueGrowth * 100 : undefined,
+        format: "percent",
+      },
+      {
+        group: "Growth",
+        label: "Target Upside",
+        tooltip: "Analyst mean price target versus current price",
+        direction: "higher",
+        left: targetUpside(la?.targetMeanPrice, lq?.regularMarketPrice),
+        right: targetUpside(ra?.targetMeanPrice, rq?.regularMarketPrice),
+        format: "percent",
+      },
+      {
+        group: "Quality",
         label: "Gross Margin",
-        left:
-          leftFund.data?.grossMargins !== undefined
-            ? formatPercent(leftFund.data.grossMargins * 100)
-            : "—",
-        right:
-          rightFund.data?.grossMargins !== undefined
-            ? formatPercent(rightFund.data.grossMargins * 100)
-            : "—",
+        tooltip: "Revenue retained after direct costs",
+        direction: "higher",
+        left: lf?.grossMargins !== undefined ? lf.grossMargins * 100 : undefined,
+        right: rf?.grossMargins !== undefined ? rf.grossMargins * 100 : undefined,
+        format: "percent",
       },
       {
-        label: "ROE",
-        left:
-          leftFund.data?.returnOnEquity !== undefined
-            ? formatPercent(leftFund.data.returnOnEquity * 100)
-            : "—",
-        right:
-          rightFund.data?.returnOnEquity !== undefined
-            ? formatPercent(rightFund.data.returnOnEquity * 100)
-            : "—",
+        group: "Quality",
+        label: "Operating Margin",
+        tooltip: "Operating profit as a percent of revenue",
+        direction: "higher",
+        left: lf?.operatingMargins !== undefined ? lf.operatingMargins * 100 : undefined,
+        right: rf?.operatingMargins !== undefined ? rf.operatingMargins * 100 : undefined,
+        format: "percent",
       },
-    ],
-    [left.data, leftFund.data, right.data, rightFund.data]
-  );
+      {
+        group: "Quality",
+        label: "ROE",
+        tooltip: "Return on equity: profit generated from shareholder capital",
+        direction: "higher",
+        left: lf?.returnOnEquity !== undefined ? lf.returnOnEquity * 100 : undefined,
+        right: rf?.returnOnEquity !== undefined ? rf.returnOnEquity * 100 : undefined,
+        format: "percent",
+      },
+      {
+        group: "Quality",
+        label: "FCF Margin",
+        tooltip: "Free cash flow as a percent of revenue",
+        direction: "higher",
+        left: fcfMargin(lf?.freeCashflow, lf?.totalRevenue),
+        right: fcfMargin(rf?.freeCashflow, rf?.totalRevenue),
+        format: "percent",
+      },
+      {
+        group: "Risk",
+        label: "Debt / Equity",
+        tooltip: "Leverage relative to shareholder equity",
+        direction: "lower",
+        left: lf?.debtToEquity,
+        right: rf?.debtToEquity,
+        format: "ratio",
+      },
+      {
+        group: "Risk",
+        label: "Beta",
+        tooltip: "Volatility vs the broader market (~1.0 = market-like risk)",
+        direction: "lower",
+        left: lf?.beta,
+        right: rf?.beta,
+        format: "ratio",
+      },
+      {
+        group: "Risk",
+        label: "Analyst Risk Score",
+        tooltip: "Analyst recommendation mean where 1.0 is best and 5.0 is worst",
+        direction: "lower",
+        left: la?.recommendationMean,
+        right: ra?.recommendationMean,
+        format: "score",
+      },
+    ];
+  }, [
+    left.data,
+    right.data,
+    leftFund.data,
+    rightFund.data,
+    leftAnalyst.data,
+    rightAnalyst.data,
+  ]);
+
+  const groupOrder: CompareMetric["group"][] = [
+    "Valuation",
+    "Growth",
+    "Quality",
+    "Risk",
+  ];
+  const groupedRows = groupOrder.map((group) => ({
+    group,
+    rows: metrics.filter((m) => m.group === group),
+  }));
+
+  const summary = useMemo(() => {
+    const groups: Record<CompareMetric["group"], { left: number; right: number }> = {
+      Valuation: { left: 0, right: 0 },
+      Growth: { left: 0, right: 0 },
+      Quality: { left: 0, right: 0 },
+      Risk: { left: 0, right: 0 },
+    };
+
+    for (const metric of metrics) {
+      const winner = pickWinner(metric.left, metric.right, metric.direction);
+      if (winner === "left") groups[metric.group].left += 1;
+      if (winner === "right") groups[metric.group].right += 1;
+    }
+    return groups;
+  }, [metrics]);
 
   return (
     <Panel
       title={`Compare ${selectedTicker} vs ${peer}`}
-      isLoading={left.isLoading || leftFund.isLoading || right.isLoading || rightFund.isLoading}
-      error={left.error?.message ?? leftFund.error?.message}
+      isLoading={
+        left.isLoading ||
+        leftFund.isLoading ||
+        leftAnalyst.isLoading ||
+        right.isLoading ||
+        rightFund.isLoading ||
+        rightAnalyst.isLoading
+      }
+      error={
+        left.error?.message ??
+        leftFund.error?.message ??
+        leftAnalyst.error?.message
+      }
       onRetry={() => {
         left.refetch();
         right.refetch();
         leftFund.refetch();
         rightFund.refetch();
+        leftAnalyst.refetch();
+        rightAnalyst.refetch();
       }}
       lastUpdatedAt={Math.max(
         left.dataUpdatedAt || 0,
         right.dataUpdatedAt || 0,
         leftFund.dataUpdatedAt || 0,
-        rightFund.dataUpdatedAt || 0
+        rightFund.dataUpdatedAt || 0,
+        leftAnalyst.dataUpdatedAt || 0,
+        rightAnalyst.dataUpdatedAt || 0
       )}
       staleAfterMs={180_000}
     >
@@ -135,38 +286,99 @@ export function ComparePanel() {
             Update the ticker and click Apply.
           </div>
         )}
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-terminal-border text-terminal-muted">
-              <th className="text-left px-3 py-2">Metric</th>
-              <th className="text-right px-3 py-2">{selectedTicker}</th>
-              <th className="text-right px-3 py-2">{peer}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.label} className="border-b border-terminal-border/50">
-                <td
-                  className="px-3 py-1.5 text-terminal-muted terminal-tooltip"
-                  data-tooltip={metricTooltipByLabel[r.label]}
-                >
-                  {r.label}
-                </td>
-                <td className="px-3 py-1.5 text-right font-mono">{r.left}</td>
-                <td className="px-3 py-1.5 text-right font-mono">{r.right}</td>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-1 px-2 py-2 border-b border-terminal-border">
+          {groupOrder.map((group) => {
+            const leftWins = summary[group].left;
+            const rightWins = summary[group].right;
+            const winner =
+              leftWins === rightWins
+                ? "Tie"
+                : leftWins > rightWins
+                ? selectedTicker
+                : peer;
+            return (
+              <div key={group} className="border border-terminal-border rounded px-2 py-1">
+                <div className="text-[10px] uppercase tracking-wider text-terminal-muted">
+                  {group}
+                </div>
+                <div className="text-xs font-mono mt-0.5">
+                  {selectedTicker} {leftWins} : {rightWins} {peer}
+                </div>
+                <div className="text-[10px] text-terminal-accent mt-0.5">
+                  {winner === "Tie" ? "Tie" : `${winner} leads`}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="overflow-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-terminal-border text-terminal-muted">
+                <th className="text-left px-3 py-2">Metric</th>
+                <th className="text-right px-3 py-2">{selectedTicker}</th>
+                <th className="text-right px-3 py-2">{peer}</th>
+                <th className="text-right px-3 py-2">Edge</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {groupedRows.map(({ group, rows }) => (
+                rows.map((row, idx) => {
+                  const winner = pickWinner(row.left, row.right, row.direction);
+                  return (
+                    <tr key={`${group}-${row.label}`} className="border-b border-terminal-border/50">
+                      <td
+                        className={`px-3 py-1.5 text-terminal-muted terminal-tooltip ${
+                          idx === 0 ? "border-t border-terminal-border/30" : ""
+                        }`}
+                        data-tooltip={row.tooltip}
+                      >
+                        <span className="text-[10px] text-terminal-accent mr-2">{idx === 0 ? group : ""}</span>
+                        {row.label}
+                      </td>
+                      <td className={`px-3 py-1.5 text-right font-mono ${winner === "left" ? "text-terminal-up" : ""}`}>
+                        {formatMetricValue(row.left, row.format)}
+                      </td>
+                      <td className={`px-3 py-1.5 text-right font-mono ${winner === "right" ? "text-terminal-up" : ""}`}>
+                        {formatMetricValue(row.right, row.format)}
+                      </td>
+                      <td className="px-3 py-1.5 text-right font-mono text-terminal-muted">
+                        {winner === "left"
+                          ? selectedTicker
+                          : winner === "right"
+                          ? peer
+                          : "—"}
+                      </td>
+                    </tr>
+                  );
+                })
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </Panel>
   );
 }
 
-const metricTooltipByLabel: Record<string, string> = {
-  "1D %": "Percent move over the current trading day",
-  "P/E": "Price-to-earnings ratio based on trailing earnings",
-  "Rev Growth": "Year-over-year revenue growth rate",
-  "Gross Margin": "Share of revenue left after direct costs",
-  "ROE": "Return on equity: profit generated from shareholder equity",
-};
+function pickWinner(
+  left: number | undefined,
+  right: number | undefined,
+  direction: Direction
+) {
+  if (left === undefined || right === undefined) return "none" as const;
+  if (Math.abs(left - right) < 1e-9) return "none" as const;
+  if (direction === "higher") return left > right ? "left" : "right";
+  return left < right ? "left" : "right";
+}
+
+function formatMetricValue(
+  value: number | undefined,
+  format: CompareMetric["format"]
+) {
+  if (value === undefined || Number.isNaN(value)) return "—";
+  if (format === "percent") return formatPercent(value);
+  if (format === "multiple") return `${value.toFixed(2)}x`;
+  if (format === "score") return `${value.toFixed(1)} / 5`;
+  return value.toFixed(2);
+}
