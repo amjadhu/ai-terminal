@@ -15,10 +15,23 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
+html.light {
+  --color-terminal-bg: #f5f7fb;
+  --color-terminal-panel: #ffffff;
+  --color-terminal-border: #d9dfeb;
+  --color-terminal-text: #111827;
+  --color-terminal-muted: #4b5563;
+  --color-terminal-accent: #d97706;
+  --color-terminal-up: #059669;
+  --color-terminal-down: #dc2626;
+  --color-terminal-hover: #edf2f8;
+}
+
 body {
   background-color: var(--color-terminal-bg);
   color: var(--color-terminal-text);
   font-family: var(--font-sans);
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 /* react-grid-layout styles */
@@ -121,7 +134,7 @@ body {
 .ticker-marquee-track {
   display: inline-block;
   min-width: 200%;
-  animation: ticker-scroll 36s linear infinite;
+  animation: ticker-scroll 43s linear infinite;
 }
 
 .ticker-marquee:hover .ticker-marquee-track,

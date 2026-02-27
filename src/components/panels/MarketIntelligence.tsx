@@ -52,7 +52,10 @@ export function MarketIntelligence() {
       <div className="grid grid-cols-1 md:grid-cols-4 h-full divide-y md:divide-y-0 md:divide-x divide-terminal-border">
         <section className="p-3 flex flex-col justify-between bg-[linear-gradient(180deg,rgba(255,140,0,0.08),rgba(255,140,0,0.02))]">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-terminal-muted">
+            <div
+              className="text-[10px] uppercase tracking-widest text-terminal-muted"
+              title="Overall market tone from breadth, trend, and volatility"
+            >
               Regime
             </div>
             <div
@@ -155,7 +158,10 @@ export function MarketIntelligence() {
                 className="block rounded border border-terminal-border p-2 hover:bg-terminal-hover transition-colors"
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-terminal-accent text-[10px] uppercase tracking-wider">
+                  <span
+                    className="text-terminal-accent text-[10px] uppercase tracking-wider"
+                    title="Estimated strength of potential market impact (higher = stronger)"
+                  >
                     impact {item.impactScore}
                   </span>
                   <span className="text-terminal-muted text-[10px]">
@@ -183,9 +189,18 @@ export function MarketIntelligence() {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
+  const tooltipByLabel: Record<string, string> = {
+    Breadth: "Percent of sectors trading up today",
+    "S&P 500": "Today's move in the S&P 500 index",
+    VIX: "Market fear gauge based on S&P 500 options",
+    Confidence: "How strong the regime signal is",
+  };
+
   return (
     <div className="flex justify-between">
-      <span className="text-terminal-muted">{label}</span>
+      <span className="text-terminal-muted" title={tooltipByLabel[label]}>
+        {label}
+      </span>
       <span className="font-mono">{value}</span>
     </div>
   );

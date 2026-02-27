@@ -105,7 +105,12 @@ function OverviewTab({ data }: { data: FundamentalsData }) {
             </div>
           )}
           <div className="flex items-center justify-between px-3 py-1.5">
-            <span className="text-[11px] text-terminal-muted">{row.label}</span>
+            <span
+              className="text-[11px] text-terminal-muted"
+              title={overviewTooltipByLabel[row.label]}
+            >
+              {row.label}
+            </span>
             <span className="text-[11px] font-mono text-terminal-text">{row.value}</span>
           </div>
         </div>
@@ -113,6 +118,30 @@ function OverviewTab({ data }: { data: FundamentalsData }) {
     </div>
   );
 }
+
+const overviewTooltipByLabel: Record<string, string> = {
+  "Revenue (TTM)": "Total sales over the trailing twelve months",
+  "Net Income (TTM)": "Profit after expenses over the trailing twelve months",
+  EBITDA: "Earnings before interest, taxes, depreciation, and amortization",
+  "Free Cash Flow": "Cash left after operating costs and capital spending",
+  "Rev Growth (YoY)": "Revenue change versus the same period last year",
+  "Gross Margin": "Share of revenue remaining after direct costs",
+  "Operating Margin": "Operating income as a percent of revenue",
+  "Profit Margin": "Net income as a percent of revenue",
+  "Return on Equity": "Profit generated from shareholder equity",
+  "Return on Assets": "Profit generated from total assets",
+  "Debt / Equity": "Company debt relative to shareholder equity",
+  "Current Ratio": "Short-term assets divided by short-term liabilities",
+  "Quick Ratio": "Liquid assets divided by short-term liabilities",
+  "Enterprise Value": "Total company value including debt and cash",
+  "EV / Revenue": "Enterprise value divided by annual revenue",
+  "EV / EBITDA": "Enterprise value divided by EBITDA",
+  "P / Book": "Share price divided by book value per share",
+  "Trailing EPS": "Earnings per share from the last twelve months",
+  "Forward EPS": "Analyst estimate of next period earnings per share",
+  "PEG Ratio": "P/E adjusted by expected earnings growth",
+  Beta: "How sensitive the stock is versus the market",
+};
 
 // ─── Income tab ────────────────────────────────────────────────────────────
 

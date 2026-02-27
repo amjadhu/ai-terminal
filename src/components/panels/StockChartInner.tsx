@@ -10,6 +10,7 @@ import {
   LineSeries,
 } from "lightweight-charts";
 import type { ChartDataPoint } from "@/types";
+import { useSettingsStore } from "@/stores/settings";
 
 interface Props {
   data: ChartDataPoint[];
@@ -28,6 +29,7 @@ export default function StockChartInner({
   mainSymbol,
   compareSymbol,
 }: Props) {
+  const theme = useSettingsStore((s) => s.theme);
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candleRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
@@ -126,6 +128,44 @@ export default function StockChartInner({
   }, []);
 
   useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    const css = getComputedStyle(document.documentElement);
+    const panel = readCssColor(css, "--color-terminal-panel", "#12121a");
+    const muted = readCssColor(css, "--color-terminal-muted", "#6b7280");
+    const border = readCssColor(css, "--color-terminal-border", "#1e1e2e");
+    const accent = readCssColor(css, "--color-terminal-accent", "#ff8c00");
+    const up = readCssColor(css, "--color-terminal-up", "#00dc82");
+    const down = readCssColor(css, "--color-terminal-down", "#ff4757");
+
+    chart.applyOptions({
+      layout: {
+        background: { color: panel },
+        textColor: muted,
+      },
+      grid: {
+        vertLines: { color: border },
+        horzLines: { color: border },
+      },
+      crosshair: {
+        vertLine: { color: accent, width: 1, style: 2 },
+        horzLine: { color: accent, width: 1, style: 2 },
+      },
+      rightPriceScale: { borderColor: border },
+      timeScale: { borderColor: border, timeVisible: true },
+    });
+
+    candleRef.current?.applyOptions({
+      upColor: up,
+      downColor: down,
+      borderUpColor: up,
+      borderDownColor: down,
+      wickUpColor: up,
+      wickDownColor: down,
+    });
+  }, [theme]);
+
+  useEffect(() => {
     if (!data || data.length === 0 || !candleRef.current || !volumeRef.current)
       return;
 
@@ -191,29 +231,38 @@ export default function StockChartInner({
         <LegendTag
           color="#00dc82"
           label={`${mainSymbol} ${latest ? latest.close.toFixed(2) : "—"}`}
+          tooltip={`${mainSymbol} latest close price`}
         />
         {compareSymbol && compareIndexed !== undefined && (
           <LegendTag
             color="#a78bfa"
             label={`${compareSymbol} IDX ${compareIndexed.toFixed(2)}`}
             dashed
+            tooltip={`${compareSymbol} rebased to 100 at the period start`}
           />
         )}
         {showSma20 && (
           <LegendTag
             color="#facc15"
             label={`SMA20 ${latestSma20 !== undefined ? latestSma20.toFixed(2) : "—"}`}
+            tooltip="20-day simple moving average"
           />
         )}
         {showSma50 && (
           <LegendTag
             color="#60a5fa"
             label={`SMA50 ${latestSma50 !== undefined ? latestSma50.toFixed(2) : "—"}`}
+            tooltip="50-day simple moving average"
           />
         )}
       </div>
     </div>
   );
+}
+
+function readCssColor(css: CSSStyleDeclaration, key: string, fallback: string) {
+  const value = css.getPropertyValue(key).trim();
+  return value || fallback;
 }
 
 function makeSMA(data: ChartDataPoint[], period: number) {
@@ -247,13 +296,18 @@ function LegendTag({
   color,
   label,
   dashed = false,
+  tooltip,
 }: {
   color: string;
   label: string;
   dashed?: boolean;
+  tooltip?: string;
 }) {
   return (
-    <div className="flex items-center gap-1.5 px-2 py-1 rounded border border-terminal-border bg-terminal-panel/85 backdrop-blur-sm">
+    <div
+      className="flex items-center gap-1.5 px-2 py-1 rounded border border-terminal-border bg-terminal-panel/85 backdrop-blur-sm"
+      title={tooltip}
+    >
       <span
         className={`w-3 h-0.5 ${dashed ? "border-t-2 border-dashed" : ""}`}
         style={

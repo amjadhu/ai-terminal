@@ -109,7 +109,12 @@ export function ComparePanel() {
           <tbody>
             {rows.map((r) => (
               <tr key={r.label} className="border-b border-terminal-border/50">
-                <td className="px-3 py-1.5 text-terminal-muted">{r.label}</td>
+                <td
+                  className="px-3 py-1.5 text-terminal-muted"
+                  title={metricTooltipByLabel[r.label]}
+                >
+                  {r.label}
+                </td>
                 <td className="px-3 py-1.5 text-right font-mono">{r.left}</td>
                 <td className="px-3 py-1.5 text-right font-mono">{r.right}</td>
               </tr>
@@ -120,3 +125,11 @@ export function ComparePanel() {
     </Panel>
   );
 }
+
+const metricTooltipByLabel: Record<string, string> = {
+  "1D %": "Percent move over the current trading day",
+  "P/E": "Price-to-earnings ratio based on trailing earnings",
+  "Rev Growth": "Year-over-year revenue growth rate",
+  "Gross Margin": "Share of revenue left after direct costs",
+  "ROE": "Return on equity: profit generated from shareholder equity",
+};

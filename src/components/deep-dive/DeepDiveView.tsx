@@ -107,7 +107,11 @@ function CompanyView({ data }: { data: DeepDiveCompanyData }) {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
           <Stat label="Market Cap" value={data.marketCap ? formatNumber(data.marketCap) : "—"} />
-          <Stat label="P/E" value={data.trailingPE ? data.trailingPE.toFixed(2) : "—"} />
+          <Stat
+            label="P/E"
+            value={data.trailingPE ? data.trailingPE.toFixed(2) : "—"}
+            tooltip="Price-to-earnings ratio based on trailing earnings"
+          />
           <Stat label="Volume" value={data.volume ? formatNumber(data.volume) : "—"} />
           <Stat label="Avg Volume" value={data.avgVolume ? formatNumber(data.avgVolume) : "—"} />
         </div>
@@ -160,7 +164,12 @@ function CompanyView({ data }: { data: DeepDiveCompanyData }) {
               className="rounded border border-terminal-border p-2 hover:bg-terminal-hover transition-colors"
             >
               <div className="flex justify-between gap-2 text-[10px]">
-                <span className="text-terminal-accent uppercase">Impact {item.impactScore}</span>
+                <span
+                  className="text-terminal-accent uppercase"
+                  title="Estimated strength of potential market impact (higher = stronger)"
+                >
+                  Impact {item.impactScore}
+                </span>
                 <span className="text-terminal-muted">{item.publisher}</span>
               </div>
               <p className="text-sm mt-1 line-clamp-3">{item.title}</p>
@@ -189,7 +198,11 @@ function SectorView({ data }: { data: DeepDiveSectorData }) {
         <h2 className="text-lg font-semibold">{data.sector}</h2>
         <div className="text-xs text-terminal-muted mt-0.5">Sector Deep Dive</div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-          <Stat label="Breadth" value={`${data.breadthPercent.toFixed(0)}%`} />
+          <Stat
+            label="Breadth"
+            value={`${data.breadthPercent.toFixed(0)}%`}
+            tooltip="Percent of symbols in the theme trading up"
+          />
           <Stat label="Avg Move" value={formatPercent(data.avgChangePercent)} />
           <Stat label="Leaders" value={String(data.leaders.length)} />
           <Stat label="Laggards" value={String(data.laggards.length)} />
@@ -245,7 +258,12 @@ function SectorView({ data }: { data: DeepDiveSectorData }) {
               className="rounded border border-terminal-border p-2 hover:bg-terminal-hover transition-colors"
             >
               <div className="flex justify-between gap-2 text-[10px]">
-                <span className="text-terminal-accent uppercase">Impact {item.impactScore}</span>
+                <span
+                  className="text-terminal-accent uppercase"
+                  title="Estimated strength of potential market impact (higher = stronger)"
+                >
+                  Impact {item.impactScore}
+                </span>
                 <span className="text-terminal-muted">{item.publisher}</span>
               </div>
               <p className="text-sm mt-1 line-clamp-3">{item.title}</p>
@@ -267,10 +285,23 @@ function SectorView({ data }: { data: DeepDiveSectorData }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  tooltip,
+}: {
+  label: string;
+  value: string;
+  tooltip?: string;
+}) {
   return (
     <div className="rounded border border-terminal-border p-2">
-      <div className="text-[10px] uppercase tracking-wider text-terminal-muted">{label}</div>
+      <div
+        className="text-[10px] uppercase tracking-wider text-terminal-muted"
+        title={tooltip}
+      >
+        {label}
+      </div>
       <div className="mt-1 text-sm font-mono">{value}</div>
     </div>
   );

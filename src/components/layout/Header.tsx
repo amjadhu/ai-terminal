@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RotateCcw, Terminal } from "lucide-react";
+import { Moon, RotateCcw, Sun, Terminal } from "lucide-react";
 import { useLayoutStore } from "@/stores/layout";
 import { useViewStore } from "@/stores/view";
 import { RollingTicker } from "@/components/layout/RollingTicker";
+import { useSettingsStore } from "@/stores/settings";
 
 export function Header() {
   const [time, setTime] = useState<string>("");
@@ -12,6 +13,8 @@ export function Header() {
   const resetLayouts = useLayoutStore((s) => s.resetLayouts);
   const mode = useViewStore((s) => s.mode);
   const setMode = useViewStore((s) => s.setMode);
+  const theme = useSettingsStore((s) => s.theme);
+  const toggleTheme = useSettingsStore((s) => s.toggleTheme);
 
   useEffect(() => {
     const update = () => {
@@ -40,6 +43,12 @@ export function Header() {
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("dark", "light");
+    root.classList.add(theme);
+  }, [theme]);
 
   return (
     <header className="flex items-center gap-3 px-4 py-2 border-b border-terminal-border bg-terminal-panel">
@@ -86,6 +95,18 @@ export function Header() {
           </span>
         </div>
         <span className="text-xs font-mono text-terminal-muted">{time}</span>
+        <button
+          onClick={toggleTheme}
+          className="text-terminal-muted hover:text-terminal-text transition-colors"
+          title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+        >
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
+        </button>
         <button
           onClick={resetLayouts}
           className="text-terminal-muted hover:text-terminal-text transition-colors"

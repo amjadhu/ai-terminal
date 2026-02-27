@@ -53,7 +53,10 @@ function EarningsRow({ item }: { item: EarningsItem }) {
 
       {/* Middle: EPS estimate */}
       <div className="flex flex-col items-center gap-0.5 px-3">
-        <span className="text-[9px] text-terminal-muted uppercase tracking-wider">
+        <span
+          className="text-[9px] text-terminal-muted uppercase tracking-wider"
+          title="Wall Street's expected earnings per share"
+        >
           EPS Est
         </span>
         <span className="text-xs font-mono text-terminal-text">

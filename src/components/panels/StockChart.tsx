@@ -51,7 +51,10 @@ export function StockChart() {
               {range}
             </button>
           ))}
-          <label className="ml-2 text-[10px] text-terminal-muted flex items-center gap-1">
+          <label
+            className="ml-2 text-[10px] text-terminal-muted flex items-center gap-1"
+            title="20-day simple moving average"
+          >
             <input
               type="checkbox"
               checked={showSma20}
@@ -59,7 +62,10 @@ export function StockChart() {
             />
             SMA20
           </label>
-          <label className="text-[10px] text-terminal-muted flex items-center gap-1">
+          <label
+            className="text-[10px] text-terminal-muted flex items-center gap-1"
+            title="50-day simple moving average"
+          >
             <input
               type="checkbox"
               checked={showSma50}

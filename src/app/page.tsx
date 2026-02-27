@@ -10,20 +10,21 @@ import { useSettingsStore } from "@/stores/settings";
 
 export default function Home() {
   const mode = useViewStore((s) => s.mode);
-  const selectedTicker = useSettingsStore((s) => s.selectedTicker);
-  const prevTicker = useRef<string | null>(null);
+  const selectedTickerSelectionSeq = useSettingsStore(
+    (s) => s.selectedTickerSelectionSeq
+  );
+  const prevSelectionSeq = useRef<number>(selectedTickerSelectionSeq);
 
   useEffect(() => {
     if (mode !== "dashboard") return;
-    if (!prevTicker.current) {
-      prevTicker.current = selectedTicker;
+    if (selectedTickerSelectionSeq <= prevSelectionSeq.current) {
+      prevSelectionSeq.current = selectedTickerSelectionSeq;
       return;
     }
-    if (prevTicker.current === selectedTicker) return;
-    prevTicker.current = selectedTicker;
+    prevSelectionSeq.current = selectedTickerSelectionSeq;
     const target = document.getElementById("symbol-workbench");
     target?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [selectedTicker, mode]);
+  }, [selectedTickerSelectionSeq, mode]);
 
   return (
     <div className="flex flex-col h-screen">
