@@ -6,7 +6,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { useLayoutStore } from "@/stores/layout";
 
 export function useServerSync() {
-  const skipMount = useRef(true);
+  const skipCount = useRef(1); // skip first effect run (mount) + hydration run
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const tickers = useWatchlistStore((s) => s.tickers);
@@ -16,40 +16,44 @@ export function useServerSync() {
 
   // On mount: hydrate all stores from server (server wins over localStorage)
   useEffect(() => {
-    console.log("[sync] fetching server state...");
     fetch("/api/state")
       .then((r) => r.json())
       .then((server) => {
-        console.log("[sync] server state:", server);
-        if (server.tickers?.length)
+        let didUpdate = false;
+        if (server.tickers?.length) {
           useWatchlistStore.setState({ tickers: server.tickers });
-        if (server.selectedTicker)
+          didUpdate = true;
+        }
+        if (server.selectedTicker) {
           useSettingsStore.setState({ selectedTicker: server.selectedTicker });
-        if (server.timeRange)
+          didUpdate = true;
+        }
+        if (server.timeRange) {
           useSettingsStore.setState({ timeRange: server.timeRange });
-        if (server.layouts?.length)
+          didUpdate = true;
+        }
+        if (server.layouts?.length) {
           useLayoutStore.setState({ layouts: server.layouts });
+          didUpdate = true;
+        }
+        if (didUpdate) skipCount.current++;
       })
-      .catch((err) => console.error("[sync] GET failed:", err));
+      .catch(console.error);
   }, []);
 
-  // Debounce-write on any state change, skipping the initial mount run
+  // Debounce-write on any state change, skipping mount and hydration runs
   useEffect(() => {
-    if (skipMount.current) {
-      skipMount.current = false;
+    if (skipCount.current > 0) {
+      skipCount.current--;
       return;
     }
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      console.log("[sync] writing state to server...");
       fetch("/api/state", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tickers, selectedTicker, timeRange, layouts }),
-      })
-        .then((r) => r.json())
-        .then((res) => console.log("[sync] PUT result:", res))
-        .catch((err) => console.error("[sync] PUT failed:", err));
+      }).catch(console.error);
     }, 1500);
     return () => clearTimeout(timer.current);
   }, [tickers, selectedTicker, timeRange, layouts]);
