@@ -45,27 +45,31 @@ const PANEL_COMPONENTS: Record<string, React.ComponentType> = {
 export function TerminalGrid() {
   const { layouts, setLayouts } = useLayoutStore();
   const { width, containerRef } = useContainerWidth({ initialWidth: 1280 });
+  const validLayouts = useMemo(
+    () => layouts.filter((l) => !!PANEL_COMPONENTS[l.i]),
+    [layouts]
+  );
 
-  const lgLayout = useMemo(() => layouts, [layouts]);
+  const lgLayout = useMemo(() => validLayouts, [validLayouts]);
   const mdLayout = useMemo(
     () =>
-      layouts.map((l) => ({
+      validLayouts.map((l) => ({
         ...l,
         w: FULL_WIDTH_PANELS.has(l.i) ? 10 : Math.min(l.w, 5),
         x: FULL_WIDTH_PANELS.has(l.i) ? 0 : l.x % 10,
       })),
-    [layouts]
+    [validLayouts]
   );
   const smLayout = useMemo(
     () =>
-      layouts.map((l, i) => ({
+      validLayouts.map((l, i) => ({
         ...l,
         x: 0,
         y: i * 6,
         w: 6,
         h: l.i === "market" ? 4 : l.i === "sector" ? 10 : 6,
       })),
-    [layouts]
+    [validLayouts]
   );
 
   return (
@@ -84,15 +88,18 @@ export function TerminalGrid() {
           rowHeight={40}
           margin={[8, 8] as [number, number]}
           containerPadding={[8, 8] as [number, number]}
-          onLayoutChange={(_current: any, allLayouts: any) => {
-            if (allLayouts?.lg) {
-              setLayouts(allLayouts.lg as PanelLayout[]);
+          onLayoutChange={(_current: unknown, allLayouts: unknown) => {
+            const typedLayouts = allLayouts as { lg?: PanelLayout[] } | undefined;
+            if (typedLayouts?.lg) {
+              const cleaned = (typedLayouts?.lg ?? []).filter(
+                (l) => !!PANEL_COMPONENTS[l.i]
+              );
+              setLayouts(cleaned);
             }
           }}
         >
-          {layouts.map((layout) => {
+          {validLayouts.map((layout) => {
             const Component = PANEL_COMPONENTS[layout.i];
-            if (!Component) return null;
             return (
               <div key={layout.i}>
                 <Component />
