@@ -4,9 +4,13 @@ import { useMemo } from "react";
 import { useWatchlistStore } from "@/stores/watchlist";
 import { useMultiQuote } from "@/hooks/useMarketData";
 import { formatPercent, formatPrice } from "@/lib/utils";
+import { useSettingsStore } from "@/stores/settings";
+import { useViewStore } from "@/stores/view";
 
 export function RollingTicker() {
   const tickers = useWatchlistStore((s) => s.tickers);
+  const setSelectedTicker = useSettingsStore((s) => s.setSelectedTicker);
+  const setMode = useViewStore((s) => s.setMode);
   const symbols = useMemo(() => tickers.slice(0, 40), [tickers]);
   const { data } = useMultiQuote(symbols);
 
@@ -23,9 +27,14 @@ export function RollingTicker() {
       <div className="ticker-marquee overflow-hidden border border-terminal-border rounded bg-terminal-bg/60">
         <div className="ticker-marquee-track">
           {[...items, ...items].map((item, i) => (
-            <span
+            <button
               key={`${item.symbol}-${i}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono"
+              type="button"
+              onClick={() => {
+                setSelectedTicker(item.symbol);
+                setMode("dashboard");
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono hover:bg-terminal-hover/80 transition-colors"
             >
               <span className="text-terminal-accent">{item.symbol}</span>
               <span className="text-terminal-text">{item.price}</span>
@@ -36,7 +45,7 @@ export function RollingTicker() {
               >
                 {formatPercent(item.change)}
               </span>
-            </span>
+            </button>
           ))}
         </div>
       </div>
