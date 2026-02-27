@@ -1,11 +1,12 @@
 "use client";
 
 import { Panel } from "@/components/ui/panel";
-import { useMarketOverview } from "@/hooks/useMarketData";
+import { useMacroData } from "@/hooks/useMarketData";
 import { formatPrice, formatChange, formatPercent, getChangeColor } from "@/lib/utils";
+import type { MarketIndex } from "@/types";
 
 export function MarketOverview() {
-  const { data, isLoading, error, refetch } = useMarketOverview();
+  const { data, isLoading, error, refetch } = useMacroData();
 
   return (
     <Panel
@@ -14,26 +15,48 @@ export function MarketOverview() {
       error={error?.message}
       onRetry={() => refetch()}
     >
-      <div className="flex items-center gap-6 px-4 py-3 overflow-x-auto h-full">
-        {data?.map((index) => (
-          <div key={index.symbol} className="flex flex-col gap-0.5 min-w-[120px]">
-            <span className="text-xs font-semibold text-terminal-accent">
-              {index.shortName}
-            </span>
-            <span className="text-sm font-mono font-medium">
-              {formatPrice(index.regularMarketPrice)}
-            </span>
-            <div className="flex gap-2 text-xs font-mono">
-              <span className={getChangeColor(index.regularMarketChange)}>
-                {formatChange(index.regularMarketChange)}
+      <div className="flex items-stretch h-full overflow-x-auto px-2 py-1 gap-0">
+        {data?.map((group, gi) => (
+          <div key={group.label} className="flex items-stretch gap-0 shrink-0">
+            {gi > 0 && (
+              <div className="flex items-center mx-2">
+                <div className="w-px h-8 bg-terminal-border" />
+              </div>
+            )}
+            <div className="flex items-center gap-0">
+              <span className="text-[9px] font-semibold tracking-widest text-terminal-muted mr-2 shrink-0 uppercase opacity-60">
+                {group.label}
               </span>
-              <span className={getChangeColor(index.regularMarketChangePercent)}>
-                {formatPercent(index.regularMarketChangePercent)}
-              </span>
+              <div className="flex items-center gap-4">
+                {group.items.map((item: MarketIndex) => (
+                  <MacroItem key={item.symbol} item={item} />
+                ))}
+              </div>
             </div>
           </div>
         ))}
       </div>
     </Panel>
+  );
+}
+
+function MacroItem({ item }: { item: MarketIndex }) {
+  return (
+    <div className="flex flex-col gap-0.5 min-w-[80px]">
+      <span className="text-[10px] font-semibold text-terminal-accent truncate">
+        {item.shortName}
+      </span>
+      <span className="text-xs font-mono font-medium">
+        {formatPrice(item.regularMarketPrice)}
+      </span>
+      <div className="flex gap-1.5 text-[10px] font-mono">
+        <span className={getChangeColor(item.regularMarketChange)}>
+          {formatChange(item.regularMarketChange)}
+        </span>
+        <span className={getChangeColor(item.regularMarketChangePercent)}>
+          {formatPercent(item.regularMarketChangePercent)}
+        </span>
+      </div>
+    </div>
   );
 }

@@ -9,7 +9,13 @@ import { StockChart } from "@/components/panels/StockChart";
 import { TickerDetail } from "@/components/panels/TickerDetail";
 import { NewsFeed } from "@/components/panels/NewsFeed";
 import { Movers } from "@/components/panels/Movers";
+import { Fundamentals } from "@/components/panels/Fundamentals";
+import { EarningsCalendar } from "@/components/panels/EarningsCalendar";
+import { SectorHeatmap } from "@/components/panels/SectorHeatmap";
+import { AnalystRatings } from "@/components/panels/AnalystRatings";
 import type { PanelLayout } from "@/types";
+
+const FULL_WIDTH_PANELS = new Set(["market", "sector"]);
 
 const PANEL_COMPONENTS: Record<string, React.ComponentType> = {
   market: MarketOverview,
@@ -18,6 +24,10 @@ const PANEL_COMPONENTS: Record<string, React.ComponentType> = {
   detail: TickerDetail,
   news: NewsFeed,
   movers: Movers,
+  fundamentals: Fundamentals,
+  earnings: EarningsCalendar,
+  sector: SectorHeatmap,
+  analysts: AnalystRatings,
 };
 
 export function TerminalGrid() {
@@ -29,8 +39,8 @@ export function TerminalGrid() {
     () =>
       layouts.map((l) => ({
         ...l,
-        w: l.i === "market" ? 10 : Math.min(l.w, 5),
-        x: l.i === "market" ? 0 : l.x % 10,
+        w: FULL_WIDTH_PANELS.has(l.i) ? 10 : Math.min(l.w, 5),
+        x: FULL_WIDTH_PANELS.has(l.i) ? 0 : l.x % 10,
       })),
     [layouts]
   );
@@ -41,7 +51,7 @@ export function TerminalGrid() {
         x: 0,
         y: i * 6,
         w: 6,
-        h: l.i === "market" ? 3 : 6,
+        h: l.i === "market" ? 4 : l.i === "sector" ? 10 : 6,
       })),
     [layouts]
   );

@@ -3,12 +3,21 @@ import { persist } from "zustand/middleware";
 import type { PanelLayout } from "@/types";
 
 const DEFAULT_LAYOUT: PanelLayout[] = [
-  { i: "market", x: 0, y: 0, w: 12, h: 3, minW: 6, minH: 2 },
-  { i: "watchlist", x: 0, y: 3, w: 4, h: 8, minW: 3, minH: 4 },
-  { i: "chart", x: 4, y: 3, w: 8, h: 8, minW: 4, minH: 5 },
-  { i: "detail", x: 0, y: 11, w: 4, h: 7, minW: 3, minH: 4 },
-  { i: "news", x: 4, y: 11, w: 4, h: 7, minW: 3, minH: 4 },
-  { i: "movers", x: 8, y: 11, w: 4, h: 7, minW: 3, minH: 4 },
+  // Row 1 — full-width macro bar
+  { i: "market",       x: 0, y: 0,  w: 12, h: 4,  minW: 8, minH: 3 },
+  // Row 2 — watchlist + chart
+  { i: "watchlist",    x: 0, y: 4,  w: 3,  h: 9,  minW: 2, minH: 4 },
+  { i: "chart",        x: 3, y: 4,  w: 9,  h: 9,  minW: 4, minH: 5 },
+  // Row 3 — ticker detail + fundamentals + analyst ratings
+  { i: "detail",       x: 0, y: 13, w: 3,  h: 8,  minW: 2, minH: 4 },
+  { i: "fundamentals", x: 3, y: 13, w: 5,  h: 8,  minW: 3, minH: 5 },
+  { i: "analysts",     x: 8, y: 13, w: 4,  h: 8,  minW: 3, minH: 5 },
+  // Row 4 — news + earnings calendar + top movers
+  { i: "news",         x: 0, y: 21, w: 4,  h: 8,  minW: 3, minH: 4 },
+  { i: "earnings",     x: 4, y: 21, w: 4,  h: 8,  minW: 3, minH: 4 },
+  { i: "movers",       x: 8, y: 21, w: 4,  h: 8,  minW: 3, minH: 4 },
+  // Row 5 — sector heatmap (full width)
+  { i: "sector",       x: 0, y: 29, w: 12, h: 8,  minW: 6, minH: 5 },
 ];
 
 interface LayoutStore {
@@ -24,6 +33,7 @@ export const useLayoutStore = create<LayoutStore>()(
       setLayouts: (layouts) => set({ layouts }),
       resetLayouts: () => set({ layouts: DEFAULT_LAYOUT }),
     }),
-    { name: "layout-storage" }
+    // v2: bumped to ensure new panels appear for returning users
+    { name: "layout-storage-v2" }
   )
 );
