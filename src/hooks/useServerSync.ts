@@ -23,12 +23,16 @@ export function useServerSync() {
       .then((server) => {
         console.log("[sync] server state:", server);
         if (server.tickers?.length) {
-          const mergedTickers = [
-            ...new Set([
-              ...DEFAULT_WATCHLIST,
-              ...server.tickers.map((t: string) => t.toUpperCase()),
-            ]),
+          const ordered = [
+            ...server.tickers.map((t: string) => t.toUpperCase()),
+            ...DEFAULT_WATCHLIST,
           ];
+          const seen = new Set<string>();
+          const mergedTickers = ordered.filter((t) => {
+            if (seen.has(t)) return false;
+            seen.add(t);
+            return true;
+          });
           useWatchlistStore.setState({ tickers: mergedTickers });
         }
         if (server.selectedTicker)

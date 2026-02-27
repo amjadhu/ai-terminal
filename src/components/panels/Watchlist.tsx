@@ -12,15 +12,16 @@ import {
   formatVolume,
   getChangeColor,
 } from "@/lib/utils";
-import { Plus, X } from "lucide-react";
+import { GripVertical, Plus, X } from "lucide-react";
 
 export function Watchlist() {
-  const { tickers, addTicker, removeTicker } = useWatchlistStore();
+  const { tickers, addTicker, removeTicker, moveTicker } = useWatchlistStore();
   const setSelectedTicker = useSettingsStore((s) => s.setSelectedTicker);
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
   const { data, isLoading, error, refetch } = useMultiQuote(tickers);
   const [addInput, setAddInput] = useState("");
   const [showAdd, setShowAdd] = useState(false);
+  const [draggedSymbol, setDraggedSymbol] = useState<string | null>(null);
 
   const handleAdd = () => {
     if (addInput.trim()) {
@@ -28,6 +29,13 @@ export function Watchlist() {
       setAddInput("");
       setShowAdd(false);
     }
+  };
+
+  const moveBySymbol = (fromSymbol: string, toSymbol: string) => {
+    const fromIndex = tickers.indexOf(fromSymbol);
+    const toIndex = tickers.indexOf(toSymbol);
+    if (fromIndex === -1 || toIndex === -1) return;
+    moveTicker(fromIndex, toIndex);
   };
 
   return (
@@ -41,6 +49,7 @@ export function Watchlist() {
         <table className="w-full text-xs">
           <thead>
             <tr className="text-terminal-muted border-b border-terminal-border">
+              <th className="w-6"></th>
               <th className="text-left px-3 py-1.5 font-medium">Symbol</th>
               <th className="text-right px-2 py-1.5 font-medium">Price</th>
               <th className="text-right px-2 py-1.5 font-medium">Chg</th>
@@ -54,10 +63,25 @@ export function Watchlist() {
               <tr
                 key={quote.symbol}
                 onClick={() => setSelectedTicker(quote.symbol)}
+                draggable
+                onDragStart={(e) => {
+                  setDraggedSymbol(quote.symbol);
+                  e.dataTransfer.effectAllowed = "move";
+                }}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (!draggedSymbol) return;
+                  moveBySymbol(draggedSymbol, quote.symbol);
+                  setDraggedSymbol(null);
+                }}
+                onDragEnd={() => setDraggedSymbol(null)}
                 className={`cursor-pointer hover:bg-terminal-hover transition-colors ${
                   selectedTicker === quote.symbol ? "bg-terminal-hover" : ""
-                }`}
+                } ${draggedSymbol === quote.symbol ? "opacity-60" : ""}`}
               >
+                <td className="px-1 py-1.5 text-terminal-muted">
+                  <GripVertical className="w-3 h-3" />
+                </td>
                 <td className="px-3 py-1.5 font-mono font-semibold text-terminal-accent">
                   {quote.symbol}
                 </td>
