@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import { RotateCcw, Terminal } from "lucide-react";
 import { useLayoutStore } from "@/stores/layout";
+import { useViewStore } from "@/stores/view";
 
 export function Header() {
   const [time, setTime] = useState<string>("");
   const [marketOpen, setMarketOpen] = useState(false);
   const resetLayouts = useLayoutStore((s) => s.resetLayouts);
+  const mode = useViewStore((s) => s.mode);
+  const setMode = useViewStore((s) => s.setMode);
 
   useEffect(() => {
     const update = () => {
@@ -39,11 +42,33 @@ export function Header() {
 
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b border-terminal-border bg-terminal-panel">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <Terminal className="w-5 h-5 text-terminal-accent" />
         <h1 className="text-sm font-bold tracking-wider text-terminal-accent">
           AI TERMINAL
         </h1>
+        <div className="hidden md:flex items-center gap-1 ml-2">
+          <button
+            onClick={() => setMode("dashboard")}
+            className={`px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider ${
+              mode === "dashboard"
+                ? "bg-terminal-accent text-terminal-bg"
+                : "text-terminal-muted hover:bg-terminal-hover"
+            }`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setMode("deep-dive")}
+            className={`px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider ${
+              mode === "deep-dive"
+                ? "bg-terminal-accent text-terminal-bg"
+                : "text-terminal-muted hover:bg-terminal-hover"
+            }`}
+          >
+            Dive Deep
+          </button>
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">

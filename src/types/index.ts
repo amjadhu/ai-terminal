@@ -270,3 +270,51 @@ export interface CalendarEvent {
   estimated?: boolean;
   source: "system" | "user";
 }
+
+// ─── Deep Dive ───────────────────────────────────────────────────────────────
+
+export interface DeepDiveNewsItem {
+  title: string;
+  link: string;
+  publisher: string;
+  providerPublishTime: number;
+  impactScore: number;
+  catalystTags: CatalystTag[];
+}
+
+export interface DeepDiveTrend {
+  label: string;
+  value: string;
+  tone: "up" | "down" | "neutral";
+}
+
+export interface DeepDiveCompanyData {
+  type: "company";
+  query: string;
+  symbol: string;
+  name: string;
+  price: number;
+  changePercent: number;
+  marketCap?: number;
+  trailingPE?: number;
+  volume?: number;
+  avgVolume?: number;
+  trends: DeepDiveTrend[];
+  relatedSymbols: string[];
+  news: DeepDiveNewsItem[];
+}
+
+export interface DeepDiveSectorData {
+  type: "sector";
+  query: string;
+  sector: string;
+  breadthPercent: number;
+  avgChangePercent: number;
+  leaders: Array<{ symbol: string; changePercent: number }>;
+  laggards: Array<{ symbol: string; changePercent: number }>;
+  symbols: string[];
+  trends: DeepDiveTrend[];
+  news: DeepDiveNewsItem[];
+}
+
+export type DeepDiveData = DeepDiveCompanyData | DeepDiveSectorData;

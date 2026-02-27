@@ -11,6 +11,7 @@ import type {
   AnalystData,
   SectorData,
   ScreenerRow,
+  DeepDiveData,
 } from "@/types";
 
 export function useMarketOverview() {
@@ -213,5 +214,19 @@ export function useScreener(params: {
       return json.data;
     },
     refetchInterval: REFETCH_INTERVALS.screener,
+  });
+}
+
+export function useDeepDive(query: string) {
+  return useQuery<DeepDiveData>({
+    queryKey: ["deep-dive", query],
+    queryFn: async () => {
+      const res = await fetch(`/api/deep-dive?q=${encodeURIComponent(query)}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      return json.data;
+    },
+    enabled: query.trim().length > 0,
+    refetchInterval: REFETCH_INTERVALS.news,
   });
 }
