@@ -16,6 +16,8 @@ interface Props {
   compareData: ChartDataPoint[];
   showSma20: boolean;
   showSma50: boolean;
+  mainSymbol: string;
+  compareSymbol: string;
 }
 
 export default function StockChartInner({
@@ -23,6 +25,8 @@ export default function StockChartInner({
   compareData,
   showSma20,
   showSma50,
+  mainSymbol,
+  compareSymbol,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -171,7 +175,45 @@ export default function StockChartInner({
     chartRef.current?.timeScale().fitContent();
   }, [data, compareData, showSma20, showSma50]);
 
-  return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />;
+  const latest = data[data.length - 1];
+  const latestCompare = compareData[compareData.length - 1];
+  const latestSma20 = showSma20 ? computeLatestSMA(data, 20) : undefined;
+  const latestSma50 = showSma50 ? computeLatestSMA(data, 50) : undefined;
+  const compareIndexed =
+    compareData.length > 0 && latestCompare
+      ? (latestCompare.close / compareData[0].close) * 100
+      : undefined;
+
+  return (
+    <div className="relative w-full h-full">
+      <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+      <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5 pointer-events-none">
+        <LegendTag
+          color="#00dc82"
+          label={`${mainSymbol} ${latest ? latest.close.toFixed(2) : "—"}`}
+        />
+        {compareSymbol && compareIndexed !== undefined && (
+          <LegendTag
+            color="#a78bfa"
+            label={`${compareSymbol} IDX ${compareIndexed.toFixed(2)}`}
+            dashed
+          />
+        )}
+        {showSma20 && (
+          <LegendTag
+            color="#facc15"
+            label={`SMA20 ${latestSma20 !== undefined ? latestSma20.toFixed(2) : "—"}`}
+          />
+        )}
+        {showSma50 && (
+          <LegendTag
+            color="#60a5fa"
+            label={`SMA50 ${latestSma50 !== undefined ? latestSma50.toFixed(2) : "—"}`}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 function makeSMA(data: ChartDataPoint[], period: number) {
@@ -191,4 +233,36 @@ function normalizeCompare(data: ChartDataPoint[]) {
     time: d.time,
     value: (d.close / base) * 100,
   }));
+}
+
+function computeLatestSMA(data: ChartDataPoint[], period: number) {
+  if (!data.length) return undefined;
+  const start = Math.max(0, data.length - period);
+  const slice = data.slice(start);
+  if (!slice.length) return undefined;
+  return slice.reduce((sum, d) => sum + d.close, 0) / slice.length;
+}
+
+function LegendTag({
+  color,
+  label,
+  dashed = false,
+}: {
+  color: string;
+  label: string;
+  dashed?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded border border-terminal-border bg-terminal-panel/85 backdrop-blur-sm">
+      <span
+        className={`w-3 h-0.5 ${dashed ? "border-t-2 border-dashed" : ""}`}
+        style={
+          dashed
+            ? { borderColor: color }
+            : { backgroundColor: color }
+        }
+      />
+      <span className="text-[10px] font-mono text-terminal-text">{label}</span>
+    </div>
+  );
 }

@@ -80,6 +80,8 @@ export function StockChart() {
             compareData={compareData ?? []}
             showSma20={showSma20}
             showSma50={showSma50}
+            mainSymbol={selectedTicker}
+            compareSymbol={compareSymbol.trim().toUpperCase()}
           />
         </div>
       </div>
