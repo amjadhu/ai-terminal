@@ -1,6 +1,7 @@
 import { Redis } from "@upstash/redis";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+const STATE_KEY = "state:global";
 
 function getRedis() {
   if (!process.env.UPSTASH_REDIS_REST_URL) return null;
@@ -10,21 +11,11 @@ function getRedis() {
   });
 }
 
-function sessionKey(id: string) {
-  return `state:${id}`;
-}
-
-const TTL = 365 * 24 * 60 * 60; // 1 year in seconds
-
 export async function GET() {
   const redis = getRedis();
   if (!redis) return NextResponse.json({});
 
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("session_id")?.value;
-  if (!sessionId) return NextResponse.json({});
-
-  const state = (await redis.get<object>(sessionKey(sessionId))) ?? {};
+  const state = (await redis.get<object>(STATE_KEY)) ?? {};
   return NextResponse.json(state);
 }
 
@@ -32,13 +23,7 @@ export async function PUT(request: Request) {
   const redis = getRedis();
   if (!redis) return NextResponse.json({ ok: true });
 
-  const cookieStore = await cookies();
-  const sessionId = cookieStore.get("session_id")?.value;
-  if (!sessionId) {
-    return NextResponse.json({ error: "No session" }, { status: 401 });
-  }
-
   const body = await request.json();
-  await redis.set(sessionKey(sessionId), body, { ex: TTL });
+  await redis.set(STATE_KEY, body);
   return NextResponse.json({ ok: true });
 }
