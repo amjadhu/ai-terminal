@@ -254,3 +254,19 @@ export interface MarketRegime {
   vix?: number;
   spxChangePercent?: number;
 }
+
+// ─── Calendar ────────────────────────────────────────────────────────────────
+
+export type CalendarCategory = "macro" | "earnings" | "custom";
+export type EventImpact = "high" | "medium" | "low";
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  category: CalendarCategory;
+  impact: EventImpact;
+  timestamp: number;
+  symbol?: string;
+  estimated?: boolean;
+  source: "system" | "user";
+}

@@ -18,6 +18,7 @@ import { AlertsPanel } from "@/components/panels/Alerts";
 import { ComparePanel } from "@/components/panels/Compare";
 import { ScreenerPanel } from "@/components/panels/Screener";
 import { MarketIntelligence } from "@/components/panels/MarketIntelligence";
+import { EventClock } from "@/components/panels/EventClock";
 import type { PanelLayout } from "@/types";
 
 const FULL_WIDTH_PANELS = new Set(["market", "intel", "sector"]);
@@ -26,6 +27,7 @@ const PANEL_COMPONENTS: Record<string, React.ComponentType> = {
   market: MarketOverview,
   intel: MarketIntelligence,
   watchlist: Watchlist,
+  calendar: EventClock,
   chart: StockChart,
   detail: TickerDetail,
   news: NewsFeed,
