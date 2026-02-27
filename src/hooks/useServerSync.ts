@@ -6,7 +6,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { useLayoutStore } from "@/stores/layout";
 
 export function useServerSync() {
-  const hydrated = useRef(false);
+  const skipMount = useRef(true);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const tickers = useWatchlistStore((s) => s.tickers);
@@ -28,15 +28,15 @@ export function useServerSync() {
         if (server.layouts?.length)
           useLayoutStore.setState({ layouts: server.layouts });
       })
-      .catch(() => {})
-      .finally(() => {
-        hydrated.current = true;
-      });
+      .catch(() => {});
   }, []);
 
-  // After hydration: debounce-write to server on any state change
+  // Debounce-write on any state change, skipping the initial mount run
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (skipMount.current) {
+      skipMount.current = false;
+      return;
+    }
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       fetch("/api/state", {
