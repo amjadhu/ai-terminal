@@ -4,8 +4,75 @@ export const MARKET_INDICES = [
   { symbol: "^GSPC", name: "S&P 500" },
   { symbol: "^DJI", name: "DOW" },
   { symbol: "^IXIC", name: "NASDAQ" },
-  { symbol: "^RUT", name: "Russell 2000" },
+  { symbol: "^RUT", name: "Russell 2K" },
   { symbol: "^VIX", name: "VIX" },
+];
+
+export const MACRO_GROUPS = [
+  {
+    label: "INDICES",
+    symbols: [
+      { symbol: "^GSPC", name: "S&P 500" },
+      { symbol: "^DJI", name: "DOW" },
+      { symbol: "^IXIC", name: "NASDAQ" },
+      { symbol: "^RUT", name: "Russell 2K" },
+      { symbol: "^VIX", name: "VIX" },
+    ],
+  },
+  {
+    label: "FUTURES",
+    symbols: [
+      { symbol: "ES=F", name: "S&P Fut" },
+      { symbol: "NQ=F", name: "NQ Fut" },
+      { symbol: "YM=F", name: "DOW Fut" },
+    ],
+  },
+  {
+    label: "BONDS",
+    symbols: [
+      { symbol: "^TNX", name: "10Y Yield" },
+      { symbol: "^TYX", name: "30Y Yield" },
+      { symbol: "^FVX", name: "5Y Yield" },
+    ],
+  },
+  {
+    label: "COMMODITIES",
+    symbols: [
+      { symbol: "GC=F", name: "Gold" },
+      { symbol: "CL=F", name: "Crude Oil" },
+      { symbol: "NG=F", name: "Nat Gas" },
+    ],
+  },
+  {
+    label: "FX",
+    symbols: [
+      { symbol: "EURUSD=X", name: "EUR/USD" },
+      { symbol: "GBPUSD=X", name: "GBP/USD" },
+      { symbol: "JPY=X", name: "USD/JPY" },
+      { symbol: "DX-Y.NYB", name: "DXY" },
+    ],
+  },
+  {
+    label: "CRYPTO",
+    symbols: [
+      { symbol: "BTC-USD", name: "Bitcoin" },
+      { symbol: "ETH-USD", name: "Ethereum" },
+    ],
+  },
+];
+
+export const SECTOR_ETFS = [
+  { symbol: "XLK", name: "Technology" },
+  { symbol: "XLF", name: "Financials" },
+  { symbol: "XLV", name: "Health Care" },
+  { symbol: "XLY", name: "Cons. Discr." },
+  { symbol: "XLC", name: "Comm. Svcs." },
+  { symbol: "XLI", name: "Industrials" },
+  { symbol: "XLE", name: "Energy" },
+  { symbol: "XLP", name: "Cons. Staples" },
+  { symbol: "XLRE", name: "Real Estate" },
+  { symbol: "XLB", name: "Materials" },
+  { symbol: "XLU", name: "Utilities" },
 ];
 
 export const REFETCH_INTERVALS = {
@@ -13,6 +80,10 @@ export const REFETCH_INTERVALS = {
   market: 60_000,
   news: 300_000,
   chart: 0, // manual refetch
+  fundamentals: 300_000,
+  earnings: 300_000,
+  analysts: 300_000,
+  sectors: 60_000,
 } as const;
 
 export const TIME_RANGE_CONFIG: Record<

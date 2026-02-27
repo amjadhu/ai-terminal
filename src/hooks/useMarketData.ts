@@ -1,6 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { REFETCH_INTERVALS } from "@/lib/constants";
-import type { MarketIndex, StockQuote, NewsItem, ChartDataPoint } from "@/types";
+import type {
+  MarketIndex,
+  MacroGroup,
+  StockQuote,
+  NewsItem,
+  ChartDataPoint,
+  FundamentalsData,
+  EarningsItem,
+  AnalystData,
+  SectorData,
+} from "@/types";
 
 export function useMarketOverview() {
   return useQuery<MarketIndex[]>({
@@ -10,6 +20,19 @@ export function useMarketOverview() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
       return json.data;
+    },
+    refetchInterval: REFETCH_INTERVALS.market,
+  });
+}
+
+export function useMacroData() {
+  return useQuery<MacroGroup[]>({
+    queryKey: ["macro"],
+    queryFn: async () => {
+      const res = await fetch("/api/macro");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      return json.groups;
     },
     refetchInterval: REFETCH_INTERVALS.market,
   });
@@ -102,5 +125,66 @@ export function useSearch(query: string) {
       return json.results;
     },
     enabled: query.length >= 1,
+  });
+}
+
+export function useFundamentals(symbol: string) {
+  return useQuery<FundamentalsData>({
+    queryKey: ["fundamentals", symbol],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/fundamentals/${encodeURIComponent(symbol)}`
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      return json;
+    },
+    enabled: !!symbol,
+    refetchInterval: REFETCH_INTERVALS.fundamentals,
+  });
+}
+
+export function useEarnings(symbols: string[]) {
+  return useQuery<EarningsItem[]>({
+    queryKey: ["earnings", symbols.join(",")],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/earnings?symbols=${encodeURIComponent(symbols.join(","))}`
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      return json.data;
+    },
+    enabled: symbols.length > 0,
+    refetchInterval: REFETCH_INTERVALS.earnings,
+  });
+}
+
+export function useAnalysts(symbol: string) {
+  return useQuery<AnalystData>({
+    queryKey: ["analysts", symbol],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/analysts/${encodeURIComponent(symbol)}`
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      return json;
+    },
+    enabled: !!symbol,
+    refetchInterval: REFETCH_INTERVALS.analysts,
+  });
+}
+
+export function useSectors() {
+  return useQuery<SectorData[]>({
+    queryKey: ["sectors"],
+    queryFn: async () => {
+      const res = await fetch("/api/sectors");
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      return json.data;
+    },
+    refetchInterval: REFETCH_INTERVALS.sectors,
   });
 }

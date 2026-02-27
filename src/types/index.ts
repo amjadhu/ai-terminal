@@ -25,6 +25,11 @@ export interface MarketIndex {
   regularMarketChangePercent: number;
 }
 
+export interface MacroGroup {
+  label: string;
+  items: MarketIndex[];
+}
+
 export interface ChartDataPoint {
   time: string;
   open: number;
@@ -59,4 +64,109 @@ export interface PanelLayout {
   h: number;
   minW?: number;
   minH?: number;
+}
+
+// ─── Fundamentals ────────────────────────────────────────────────────────────
+
+export interface IncomeStatement {
+  date: string;
+  totalRevenue?: number;
+  grossProfit?: number;
+  operatingIncome?: number;
+  netIncome?: number;
+}
+
+export interface BalanceSheet {
+  date: string;
+  totalAssets?: number;
+  totalLiabilities?: number;
+  stockholderEquity?: number;
+  cash?: number;
+  totalDebt?: number;
+}
+
+export interface CashFlowStatement {
+  date: string;
+  operatingCashFlow?: number;
+  investingCashFlow?: number;
+  financingCashFlow?: number;
+  capitalExpenditures?: number;
+  freeCashFlow?: number;
+}
+
+export interface FundamentalsData {
+  // TTM / financial health
+  totalRevenue?: number;
+  revenueGrowth?: number;
+  grossMargins?: number;
+  operatingMargins?: number;
+  profitMargins?: number;
+  ebitda?: number;
+  netIncome?: number;
+  freeCashflow?: number;
+  returnOnEquity?: number;
+  returnOnAssets?: number;
+  debtToEquity?: number;
+  currentRatio?: number;
+  quickRatio?: number;
+  // Valuation
+  enterpriseValue?: number;
+  priceToBook?: number;
+  enterpriseToRevenue?: number;
+  enterpriseToEbitda?: number;
+  beta?: number;
+  trailingEps?: number;
+  forwardEps?: number;
+  pegRatio?: number;
+  // Historical
+  incomeStatements: IncomeStatement[];
+  balanceSheets: BalanceSheet[];
+  cashFlows: CashFlowStatement[];
+}
+
+// ─── Earnings ────────────────────────────────────────────────────────────────
+
+export interface EarningsItem {
+  symbol: string;
+  companyName: string;
+  earningsDate?: string;
+  epsEstimate?: number;
+  epsActual?: number;
+  epsSurprise?: number;
+  epsSurprisePercent?: number;
+  revenueEstimate?: number;
+}
+
+// ─── Analysts ────────────────────────────────────────────────────────────────
+
+export interface AnalystTrendItem {
+  period: string;
+  strongBuy: number;
+  buy: number;
+  hold: number;
+  sell: number;
+  strongSell: number;
+}
+
+export interface AnalystData {
+  symbol: string;
+  recommendationKey?: string;
+  recommendationMean?: number;
+  numberOfAnalysts?: number;
+  targetHighPrice?: number;
+  targetLowPrice?: number;
+  targetMeanPrice?: number;
+  targetMedianPrice?: number;
+  currentPrice?: number;
+  trend: AnalystTrendItem[];
+}
+
+// ─── Sectors ─────────────────────────────────────────────────────────────────
+
+export interface SectorData {
+  symbol: string;
+  name: string;
+  price: number;
+  change: number;
+  changePercent: number;
 }
