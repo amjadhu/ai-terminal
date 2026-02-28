@@ -76,12 +76,26 @@ const FULL_WIDTH_MARKET = new Set(["market", "intel"]);
 export function TerminalGrid() {
   const { layouts, setLayouts } = useLayoutStore();
   const selectedTicker = useSettingsStore((s) => s.selectedTicker);
+  const dashboardMode = useSettingsStore((s) => s.dashboardMode);
+  const proOptionalPanels = useSettingsStore((s) => s.proOptionalPanels);
+  const toggleProOptionalPanel = useSettingsStore((s) => s.toggleProOptionalPanel);
   const { width, containerRef } = useContainerWidth({ initialWidth: 1280 });
 
+  const proOptionalSet = useMemo(
+    () => new Set(proOptionalPanels),
+    [proOptionalPanels]
+  );
+
+  const isPanelVisible = (panelId: string) => {
+    if (dashboardMode !== "pro") return true;
+    if (!PRO_OPTIONAL_PANEL_LABELS[panelId]) return true;
+    return proOptionalSet.has(panelId);
+  };
+
   const stableLayouts = useMemo(() => {
-    const valid = layouts.filter((l) => !!PANEL_COMPONENTS[l.i]);
+    const valid = layouts.filter((l) => !!PANEL_COMPONENTS[l.i] && isPanelVisible(l.i));
     return stabilizeLayouts(valid, DEFAULT_LAYOUT);
-  }, [layouts]);
+  }, [layouts, dashboardMode, proOptionalSet]);
 
   const marketLayouts = useMemo(
     () => normalizeSectionRows(stableLayouts.filter((l) => MARKET_PANEL_IDS.has(l.i))),
@@ -226,6 +240,32 @@ export function TerminalGrid() {
 
   return (
     <div ref={containerRef} className="space-y-3">
+      {dashboardMode === "pro" && (
+        <section>
+          <div className="px-2 py-1 rounded border border-terminal-border bg-terminal-panel flex flex-wrap items-center gap-1.5">
+            <span className="text-[10px] uppercase tracking-[0.14em] text-terminal-muted">
+              Pro Trim Optional Widgets
+            </span>
+            {Object.entries(PRO_OPTIONAL_PANEL_LABELS).map(([id, label]) => {
+              const enabled = proOptionalSet.has(id);
+              return (
+                <button
+                  key={id}
+                  onClick={() => toggleProOptionalPanel(id)}
+                  className={`px-2 py-0.5 rounded border text-[10px] font-mono transition-colors ${
+                    enabled
+                      ? "border-terminal-accent text-terminal-accent bg-terminal-accent/10"
+                      : "border-terminal-border text-terminal-muted hover:text-terminal-text hover:bg-terminal-hover"
+                  }`}
+                >
+                  {enabled ? "ON" : "OFF"} {label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+      {marketLayouts.length > 0 && (
       <section id="market-pulse">
         <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
           Market Pulse
@@ -259,7 +299,9 @@ export function TerminalGrid() {
           </Responsive>
         )}
       </section>
+      )}
 
+      {watchlistLayouts.length > 0 && (
       <section id="watchlist-focus">
         <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
           Watchlist & Catalysts
@@ -293,7 +335,9 @@ export function TerminalGrid() {
           </Responsive>
         )}
       </section>
+      )}
 
+      {symbolLayouts.length > 0 && (
       <section id="symbol-workbench">
         <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
           Symbol Workbench | {selectedTicker}
@@ -327,7 +371,9 @@ export function TerminalGrid() {
           </Responsive>
         )}
       </section>
+      )}
 
+      {toolLayouts.length > 0 && (
       <section id="tools-lab">
         <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
           Portfolio & Tools
@@ -361,9 +407,17 @@ export function TerminalGrid() {
           </Responsive>
         )}
       </section>
+      )}
     </div>
   );
 }
+
+const PRO_OPTIONAL_PANEL_LABELS: Record<string, string> = {
+  calendar: "Event Clock",
+  portfolio: "Portfolio",
+  alerts: "Alerts",
+  screener: "Screener",
+};
 
 function normalizeSectionRows(layouts: PanelLayout[]): PanelLayout[] {
   const rows = new Map<number, PanelLayout[]>();

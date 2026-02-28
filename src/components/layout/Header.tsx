@@ -15,6 +15,8 @@ export function Header() {
   const setMode = useViewStore((s) => s.setMode);
   const theme = useSettingsStore((s) => s.theme);
   const toggleTheme = useSettingsStore((s) => s.toggleTheme);
+  const dashboardMode = useSettingsStore((s) => s.dashboardMode);
+  const setDashboardMode = useSettingsStore((s) => s.setDashboardMode);
 
   useEffect(() => {
     const update = () => {
@@ -95,6 +97,30 @@ export function Header() {
           </span>
         </div>
         <span className="text-xs font-mono text-terminal-muted">{time}</span>
+        <div className="hidden md:flex items-center gap-1 border border-terminal-border rounded p-0.5">
+          <button
+            onClick={() => setDashboardMode("full")}
+            className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+              dashboardMode === "full"
+                ? "bg-terminal-accent text-terminal-bg"
+                : "text-terminal-muted hover:bg-terminal-hover"
+            }`}
+            title="Show all widgets"
+          >
+            FULL
+          </button>
+          <button
+            onClick={() => setDashboardMode("pro")}
+            className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+              dashboardMode === "pro"
+                ? "bg-terminal-accent text-terminal-bg"
+                : "text-terminal-muted hover:bg-terminal-hover"
+            }`}
+            title="Trim to high-signal daily workflow"
+          >
+            PRO
+          </button>
+        </div>
         <button
           onClick={toggleTheme}
           className="text-terminal-muted hover:text-terminal-text transition-colors"
