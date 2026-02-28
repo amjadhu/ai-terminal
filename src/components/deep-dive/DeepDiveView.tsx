@@ -18,9 +18,27 @@ export function DeepDiveView() {
     []
   );
 
+  const summary = useMemo(() => {
+    if (!data) return null;
+    if (data.type === "company") {
+      return [
+        { label: "Mode", value: "Company" },
+        { label: "News", value: String(data.news.length) },
+        { label: "Related", value: String(data.relatedSymbols.length) },
+        { label: "Price", value: `$${formatPrice(data.price)}` },
+      ];
+    }
+    return [
+      { label: "Mode", value: "Sector" },
+      { label: "News", value: String(data.news.length) },
+      { label: "Basket", value: String(data.symbols.length) },
+      { label: "Breadth", value: `${data.breadthPercent.toFixed(0)}%` },
+    ];
+  }, [data]);
+
   return (
     <div className="p-2 md:p-3 space-y-2">
-      <div className="rounded-lg border border-terminal-border bg-terminal-panel p-3">
+      <div className="sticky top-0 z-20 rounded-lg border border-terminal-border bg-terminal-panel/95 backdrop-blur p-3">
         <div className="flex flex-col md:flex-row md:items-center gap-2">
           <div className="text-xs text-terminal-muted uppercase tracking-wider md:w-36">
             Dive Deep Query
@@ -68,6 +86,17 @@ export function DeepDiveView() {
           </button>
         </div>
       </div>
+
+      {summary && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+          {summary.map((item) => (
+            <div key={item.label} className="rounded border border-terminal-border bg-terminal-panel px-2 py-1.5">
+              <div className="text-[9px] uppercase tracking-wider text-terminal-muted">{item.label}</div>
+              <div className="text-xs font-mono text-terminal-text mt-0.5">{item.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {isLoading && (
         <div className="rounded-lg border border-terminal-border bg-terminal-panel p-4 text-sm text-terminal-muted">

@@ -16,6 +16,10 @@ export function CommandBar() {
   const addTicker = useWatchlistStore((s) => s.addTicker);
   const { data: results } = useSearch(query);
 
+  const jumpTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement !== inputRef.current) {
@@ -77,6 +81,12 @@ export function CommandBar() {
           /
         </kbd>
       </div>
+      <div className="mt-1.5 flex flex-wrap items-center gap-1 px-1">
+        <JumpChip label="Macro" onClick={() => jumpTo("market-pulse")} />
+        <JumpChip label="Watchlist" onClick={() => jumpTo("watchlist-focus")} />
+        <JumpChip label="Workbench" onClick={() => jumpTo("symbol-workbench")} />
+        <JumpChip label="Tools" onClick={() => jumpTo("tools-lab")} />
+      </div>
 
       {isOpen && results && results.length > 0 && (
         <div className="absolute left-4 right-4 mt-1 bg-terminal-panel border border-terminal-border rounded-lg shadow-xl z-50 max-h-64 overflow-auto">
@@ -102,5 +112,16 @@ export function CommandBar() {
         </div>
       )}
     </div>
+  );
+}
+
+function JumpChip({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-2 py-0.5 rounded border border-terminal-border text-[10px] font-mono text-terminal-muted hover:text-terminal-text hover:bg-terminal-hover transition-colors"
+    >
+      {label}
+    </button>
   );
 }

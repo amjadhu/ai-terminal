@@ -46,13 +46,13 @@ const PANEL_COMPONENTS: Record<string, React.ComponentType> = {
 const MARKET_PANEL_IDS = new Set([
   "market",
   "intel",
-  "watchlist",
   "movers",
-  "earnings",
   "sector",
-  "screener",
-  "portfolio",
-  "alerts",
+]);
+
+const WATCHLIST_PANEL_IDS = new Set([
+  "watchlist",
+  "earnings",
 ]);
 
 const SYMBOL_PANEL_IDS = new Set([
@@ -65,7 +65,13 @@ const SYMBOL_PANEL_IDS = new Set([
   "news",
 ]);
 
-const FULL_WIDTH_MARKET = new Set(["market", "intel", "watchlist", "sector"]);
+const TOOL_PANEL_IDS = new Set([
+  "portfolio",
+  "alerts",
+  "screener",
+]);
+
+const FULL_WIDTH_MARKET = new Set(["market", "intel"]);
 
 export function TerminalGrid() {
   const { layouts, setLayouts } = useLayoutStore();
@@ -83,6 +89,14 @@ export function TerminalGrid() {
   );
   const symbolLayouts = useMemo(
     () => normalizeSectionRows(stableLayouts.filter((l) => SYMBOL_PANEL_IDS.has(l.i))),
+    [stableLayouts]
+  );
+  const watchlistLayouts = useMemo(
+    () => normalizeSectionRows(stableLayouts.filter((l) => WATCHLIST_PANEL_IDS.has(l.i))),
+    [stableLayouts]
+  );
+  const toolLayouts = useMemo(
+    () => normalizeSectionRows(stableLayouts.filter((l) => TOOL_PANEL_IDS.has(l.i))),
     [stableLayouts]
   );
 
@@ -114,6 +128,34 @@ export function TerminalGrid() {
       })),
     [marketLayouts]
   );
+  const watchlistLg = useMemo(
+    () => compactRowsHorizontally(watchlistLayouts, new Set(), 12),
+    [watchlistLayouts]
+  );
+  const watchlistMd = useMemo(
+    () =>
+      compactRowsHorizontally(
+        watchlistLayouts.map((l) => ({
+          ...l,
+          w: Math.min(l.w, 6),
+          x: l.x % 10,
+        })),
+        new Set(),
+        10
+      ),
+    [watchlistLayouts]
+  );
+  const watchlistSm = useMemo(
+    () =>
+      watchlistLayouts.map((l, i) => ({
+        ...l,
+        x: 0,
+        y: i * 6,
+        w: 6,
+        h: 8,
+      })),
+    [watchlistLayouts]
+  );
 
   const symbolLg = useMemo(
     () => compactRowsHorizontally(symbolLayouts, new Set(), 12),
@@ -143,6 +185,34 @@ export function TerminalGrid() {
       })),
     [symbolLayouts]
   );
+  const toolLg = useMemo(
+    () => compactRowsHorizontally(toolLayouts, new Set(), 12),
+    [toolLayouts]
+  );
+  const toolMd = useMemo(
+    () =>
+      compactRowsHorizontally(
+        toolLayouts.map((l) => ({
+          ...l,
+          w: Math.min(l.w, 5),
+          x: l.x % 10,
+        })),
+        new Set(),
+        10
+      ),
+    [toolLayouts]
+  );
+  const toolSm = useMemo(
+    () =>
+      toolLayouts.map((l, i) => ({
+        ...l,
+        x: 0,
+        y: i * 6,
+        w: 6,
+        h: 7,
+      })),
+    [toolLayouts]
+  );
 
   const persistSection = (sectionIds: Set<string>, sectionLayouts: PanelLayout[]) => {
     const byId = new Map(sectionLayouts.map((l) => [l.i, l]));
@@ -156,9 +226,12 @@ export function TerminalGrid() {
 
   return (
     <div ref={containerRef} className="space-y-3">
-      <section>
+      <section id="market-pulse">
         <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
-          Market Context & Discovery
+          Market Pulse
+        </div>
+        <div className="px-2 pb-1 text-[10px] text-terminal-muted">
+          Regime, breadth, rotation, and leadership across the tape.
         </div>
         {width > 0 && (
           <Responsive
@@ -187,9 +260,46 @@ export function TerminalGrid() {
         )}
       </section>
 
+      <section id="watchlist-focus">
+        <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
+          Watchlist & Catalysts
+        </div>
+        <div className="px-2 pb-1 text-[10px] text-terminal-muted">
+          Your names and their near-term earnings or event risk.
+        </div>
+        {width > 0 && (
+          <Responsive
+            width={width}
+            className="layout"
+            layouts={{ lg: watchlistLg, md: watchlistMd, sm: watchlistSm }}
+            breakpoints={{ lg: 1200, md: 800, sm: 0 }}
+            cols={{ lg: 12, md: 10, sm: 6 }}
+            rowHeight={40}
+            margin={[8, 8] as [number, number]}
+            containerPadding={[8, 8] as [number, number]}
+            onLayoutChange={(_current: unknown, allLayouts: unknown) => {
+              const typed = allLayouts as { lg?: PanelLayout[] } | undefined;
+              if (typed?.lg) persistSection(WATCHLIST_PANEL_IDS, typed.lg);
+            }}
+          >
+            {watchlistLayouts.map((layout) => {
+              const Component = PANEL_COMPONENTS[layout.i];
+              return (
+                <div key={layout.i}>
+                  <Component />
+                </div>
+              );
+            })}
+          </Responsive>
+        )}
+      </section>
+
       <section id="symbol-workbench">
         <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
           Symbol Workbench | {selectedTicker}
+        </div>
+        <div className="px-2 pb-1 text-[10px] text-terminal-muted">
+          Price action, quality, valuation, analysts, and ticker-specific catalysts.
         </div>
         {width > 0 && (
           <Responsive
@@ -207,6 +317,40 @@ export function TerminalGrid() {
             }}
           >
             {symbolLayouts.map((layout) => {
+              const Component = PANEL_COMPONENTS[layout.i];
+              return (
+                <div key={layout.i}>
+                  <Component />
+                </div>
+              );
+            })}
+          </Responsive>
+        )}
+      </section>
+
+      <section id="tools-lab">
+        <div className="px-2 pt-1 pb-0.5 text-[10px] uppercase tracking-[0.18em] text-terminal-muted">
+          Portfolio & Tools
+        </div>
+        <div className="px-2 pb-1 text-[10px] text-terminal-muted">
+          Position tracking, alerting, and screening workflows.
+        </div>
+        {width > 0 && (
+          <Responsive
+            width={width}
+            className="layout"
+            layouts={{ lg: toolLg, md: toolMd, sm: toolSm }}
+            breakpoints={{ lg: 1200, md: 800, sm: 0 }}
+            cols={{ lg: 12, md: 10, sm: 6 }}
+            rowHeight={40}
+            margin={[8, 8] as [number, number]}
+            containerPadding={[8, 8] as [number, number]}
+            onLayoutChange={(_current: unknown, allLayouts: unknown) => {
+              const typed = allLayouts as { lg?: PanelLayout[] } | undefined;
+              if (typed?.lg) persistSection(TOOL_PANEL_IDS, typed.lg);
+            }}
+          >
+            {toolLayouts.map((layout) => {
               const Component = PANEL_COMPONENTS[layout.i];
               return (
                 <div key={layout.i}>
