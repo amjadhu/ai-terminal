@@ -80,6 +80,7 @@ export function TerminalGrid() {
   const proOptionalPanels = useSettingsStore((s) => s.proOptionalPanels);
   const toggleProOptionalPanel = useSettingsStore((s) => s.toggleProOptionalPanel);
   const { width, containerRef } = useContainerWidth({ initialWidth: 1280 });
+  const isMobile = width < 800;
 
   const proOptionalSet = useMemo(
     () => new Set(proOptionalPanels),
@@ -283,6 +284,8 @@ export function TerminalGrid() {
             rowHeight={40}
             margin={[8, 8] as [number, number]}
             containerPadding={[8, 8] as [number, number]}
+            dragConfig={{ enabled: !isMobile }}
+            resizeConfig={{ enabled: !isMobile }}
             onLayoutChange={(_current: unknown, allLayouts: unknown) => {
               const typed = allLayouts as { lg?: PanelLayout[] } | undefined;
               if (typed?.lg) persistSection(MARKET_PANEL_IDS, typed.lg);
@@ -319,6 +322,8 @@ export function TerminalGrid() {
             rowHeight={40}
             margin={[8, 8] as [number, number]}
             containerPadding={[8, 8] as [number, number]}
+            dragConfig={{ enabled: !isMobile }}
+            resizeConfig={{ enabled: !isMobile }}
             onLayoutChange={(_current: unknown, allLayouts: unknown) => {
               const typed = allLayouts as { lg?: PanelLayout[] } | undefined;
               if (typed?.lg) persistSection(WATCHLIST_PANEL_IDS, typed.lg);
@@ -355,6 +360,8 @@ export function TerminalGrid() {
             rowHeight={40}
             margin={[8, 8] as [number, number]}
             containerPadding={[8, 8] as [number, number]}
+            dragConfig={{ enabled: !isMobile }}
+            resizeConfig={{ enabled: !isMobile }}
             onLayoutChange={(_current: unknown, allLayouts: unknown) => {
               const typed = allLayouts as { lg?: PanelLayout[] } | undefined;
               if (typed?.lg) persistSection(SYMBOL_PANEL_IDS, typed.lg);
@@ -391,6 +398,8 @@ export function TerminalGrid() {
             rowHeight={40}
             margin={[8, 8] as [number, number]}
             containerPadding={[8, 8] as [number, number]}
+            dragConfig={{ enabled: !isMobile }}
+            resizeConfig={{ enabled: !isMobile }}
             onLayoutChange={(_current: unknown, allLayouts: unknown) => {
               const typed = allLayouts as { lg?: PanelLayout[] } | undefined;
               if (typed?.lg) persistSection(TOOL_PANEL_IDS, typed.lg);
